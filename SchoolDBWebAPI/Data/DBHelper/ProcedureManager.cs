@@ -185,7 +185,7 @@ namespace SchoolDBWebAPI.Data.DBHelper
 
                 if (_table != null)
                 {
-                    objResult = _table.ConvertDataTable<T>();
+                    objResult = _table.ToList<T>();
                 }
             }
             catch (Exception Ex)
@@ -263,7 +263,7 @@ namespace SchoolDBWebAPI.Data.DBHelper
 
                 if (_table != null)
                 {
-                    objResult = _table.ConvertDataTable<T>();
+                    objResult = _table.ToList<T>();
                 }
             }
             catch (Exception Ex)

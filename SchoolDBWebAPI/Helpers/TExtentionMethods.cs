@@ -11,38 +11,6 @@ namespace SchoolDBWebAPI.Helpers
     {
         private static ILogger logger = Log.ForContext(typeof(TExtentionMethods));
 
-        public static dynamic ChangeType(this object args, string typesFullName)
-        {
-            try
-            {
-                if (args == DBNull.Value)
-                {
-                    return default(object);
-                }
-                else
-                {
-                    Type t = Type.GetType(typesFullName);
-                    return Convert.ChangeType(args, t);
-                }
-            }
-            catch (Exception Ex)
-            {
-                logger.Error(Ex, Ex.Message);
-                return default;
-            }
-        }
-
-        public static List<T> ConvertDataTable<T>(this DataTable dt)
-        {
-            List<T> data = new List<T>();
-            foreach (DataRow row in dt.Rows)
-            {
-                T item = GetItem<T>(row);
-                data.Add(item);
-            }
-            return data;
-        }
-
         private static T GetItem<T>(DataRow dr)
         {
             Type temp = typeof(T);
@@ -70,6 +38,38 @@ namespace SchoolDBWebAPI.Helpers
             catch (Exception)
             {
                 return default(T);
+            }
+        }
+
+        public static List<T> ToList<T>(this DataTable dt)
+        {
+            List<T> data = new List<T>();
+            foreach (DataRow row in dt.Rows)
+            {
+                T item = GetItem<T>(row);
+                data.Add(item);
+            }
+            return data;
+        }
+
+        public static dynamic ChangeType(this object args, string typesFullName)
+        {
+            try
+            {
+                if (args == DBNull.Value)
+                {
+                    return default(object);
+                }
+                else
+                {
+                    Type t = Type.GetType(typesFullName);
+                    return Convert.ChangeType(args, t);
+                }
+            }
+            catch (Exception Ex)
+            {
+                logger.Error(Ex, Ex.Message);
+                return default;
             }
         }
 
