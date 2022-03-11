@@ -13,19 +13,23 @@ namespace SchoolDBWebAPI.Data.DBHelper
 {
     public interface IProcedureManager : IDisposable
     {
-        List<DBSQLParameter> GenerateParams(object objModel, bool AddNull = false);
+        bool ExecStoreProcedure(string StoreProcedure, List<DBSQLParameter> SQLParameters);
 
         bool ExecStoreProcedure(string StoreProcedure, object StoreProcedureModel);
 
         int ExecStoreProcedure(string StoreProcedure, params object[] SQLParameters);
 
-        List<T> ExecStoreProcedure<T>(string StoreProcedure, object StoreProcedureModel);
-
-        bool ExecStoreProcedure(string StoreProcedure, List<DBSQLParameter> SQLParameters);
-
         List<T> ExecStoreProcedure<T>(string StoreProcedure, List<DBSQLParameter> SQLParameters);
 
+        List<T> ExecStoreProcedure<T>(string StoreProcedure, object StoreProcedureModel);
+
+        DataTable ExecStoreProcedureDT(string StoreProcedure, List<DBSQLParameter> SQLParameters);
+
+        DataTable ExecStoreProcedureDT(string StoreProcedure, object StoreProcedureModel);
+
         List<DBSQLParameter> ExecStoreProcedureOut(string StoreProcedure, List<DBSQLParameter> SQLParameters);
+
+        List<DBSQLParameter> GenerateParams(object objModel, bool AddNull = false);
     }
 
     public class ProcedureManager : IProcedureManager
@@ -141,14 +145,14 @@ namespace SchoolDBWebAPI.Data.DBHelper
 
         public int ExecStoreProcedure(string StoreProcedure, params object[] SQLParameters)
         {
-            int RowsAffected;
+            int RowsAffected = -1;
             try
             {
                 RowsAffected = dbContext.Database.ExecuteSqlRaw(StoreProcedure, SQLParameters);
             }
             catch (Exception Ex)
             {
-                throw Ex;
+                logger.Error(Ex, Ex.Message);
             }
             return RowsAffected;
         }
@@ -194,6 +198,43 @@ namespace SchoolDBWebAPI.Data.DBHelper
             }
 
             return objResult;
+        }
+
+        public DataTable ExecStoreProcedureDT(string StoreProcedure, object StoreProcedureModel)
+        {
+            DataTable dataTable = new DataTable();
+
+            try
+            {
+                List<DBSQLParameter> SQLParameters = GenerateParams(StoreProcedureModel);
+
+                using (SqlConnection connection = new SqlConnection(dbContext.Database.GetConnectionString()))
+                {
+                    using (SqlCommand sqlCommand = new SqlCommand(StoreProcedure, connection))
+                    {
+                        if (SQLParameters != null)
+                        {
+                            sqlCommand.CommandType = CommandType.StoredProcedure;
+
+                            foreach (DBSQLParameter curParam in SQLParameters)
+                            {
+                                sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                            }
+                        }
+
+                        using (var dataAdapter = new SqlDataAdapter(sqlCommand))
+                        {
+                            dataAdapter.Fill(dataTable);
+                        }
+                    }
+                }
+            }
+            catch (Exception Ex)
+            {
+                logger.Error(Ex, Ex.Message);
+            }
+
+            return dataTable;
         }
 
         public bool ExecStoreProcedure(string StoreProcedure, List<DBSQLParameter> SQLParameters)
@@ -272,6 +313,42 @@ namespace SchoolDBWebAPI.Data.DBHelper
             }
 
             return objResult;
+        }
+
+        public DataTable ExecStoreProcedureDT(string StoreProcedure, List<DBSQLParameter> SQLParameters)
+        {
+            DataTable dataTable = new DataTable();
+
+            try
+            {
+                Log.Information(StoreProcedure);
+                using (SqlConnection connection = new SqlConnection(dbContext.Database.GetConnectionString()))
+                {
+                    using (SqlCommand sqlCommand = new SqlCommand(StoreProcedure, connection))
+                    {
+                        if (SQLParameters != null)
+                        {
+                            sqlCommand.CommandType = CommandType.StoredProcedure;
+
+                            foreach (DBSQLParameter curParam in SQLParameters)
+                            {
+                                sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                            }
+                        }
+
+                        using (var dataAdapter = new SqlDataAdapter(sqlCommand))
+                        {
+                            dataAdapter.Fill(dataTable);
+                        }
+                    }
+                }
+            }
+            catch (Exception Ex)
+            {
+                logger.Error(Ex, Ex.Message);
+            }
+
+            return dataTable;
         }
 
         public List<DBSQLParameter> ExecStoreProcedureOut(string StoreProcedure, List<DBSQLParameter> SQLParameters)

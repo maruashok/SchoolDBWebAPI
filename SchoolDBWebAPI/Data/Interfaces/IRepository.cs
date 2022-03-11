@@ -17,6 +17,8 @@ namespace SchoolDBWebAPI.Data.Interfaces
 
         void Update(TEntity entityToUpdate);
 
+        void InsertRange(List<TEntity> entities);
+
         IEnumerable<TEntity> GetWithRawSql(string query, params object[] parameters);
 
         IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = "");

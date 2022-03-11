@@ -50,6 +50,11 @@ namespace SchoolDBWebAPI.Data.Repository
             context.Entry(entityToUpdate).State = EntityState.Modified;
         }
 
+        public virtual void InsertRange(List<TEntity> entities)
+        {
+            dbSet.AddRange(entities);
+        }
+
         public virtual IEnumerable<TEntity> GetWithRawSql(string query, params object[] parameters)
         {
             return dbSet.FromSqlRaw(query, parameters).ToList();
