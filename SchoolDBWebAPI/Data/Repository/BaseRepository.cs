@@ -55,12 +55,7 @@ namespace SchoolDBWebAPI.Data.Repository
             dbSet.AddRange(entities);
         }
 
-        public virtual IEnumerable<TEntity> GetWithRawSql(string query, params object[] parameters)
-        {
-            return dbSet.FromSqlRaw(query, parameters).ToList();
-        }
-
-        public virtual IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = "")
+        public virtual int GetCount(Expression<Func<TEntity, bool>> filter = null)
         {
             IQueryable<TEntity> query = dbSet;
 
@@ -69,6 +64,55 @@ namespace SchoolDBWebAPI.Data.Repository
                 query = query.Where(filter);
             }
 
+            return query.Count();
+        }
+
+        public virtual bool GetExists(Expression<Func<TEntity, bool>> filter = null)
+        {
+            IQueryable<TEntity> query = dbSet;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            return query.Any();
+        }
+
+        public virtual IEnumerable<TEntity> GetWithRawSql(string query, params object[] parameters)
+        {
+            return dbSet.FromSqlRaw(query, parameters).ToList();
+        }
+
+        public virtual TEntity GetFirst(Expression<Func<TEntity, bool>> filter = null, string includeProperties = null)
+        {
+            IQueryable<TEntity> query = dbSet;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            includeProperties ??= string.Empty;
+            foreach (var includeProperty in includeProperties.Split
+                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                query = query.Include(includeProperty);
+            }
+
+            return query.FirstOrDefault();
+        }
+
+        public virtual IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = null, int? skip = null, int? take = null)
+        {
+            IQueryable<TEntity> query = dbSet;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            includeProperties ??= string.Empty;
             foreach (var includeProperty in includeProperties.Split
                 (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
@@ -77,12 +121,20 @@ namespace SchoolDBWebAPI.Data.Repository
 
             if (orderBy != null)
             {
-                return orderBy(query).ToList();
+                query = orderBy(query);
             }
-            else
+
+            if (skip.HasValue)
             {
-                return query.ToList();
+                query = query.Skip(skip.Value);
             }
+
+            if (take.HasValue)
+            {
+                query = query.Take(take.Value);
+            }
+
+            return query;
         }
     }
 }
