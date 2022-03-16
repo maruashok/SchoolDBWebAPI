@@ -94,7 +94,14 @@ namespace SchoolDBWebAPI.Data.DBHelper
 
                             foreach (DBSQLParameter curParam in SQLParameters)
                             {
-                                sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                                if (curParam.Name.StartsWith('@'))
+                                {
+                                    sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                                }
+                                else
+                                {
+                                    sqlCommand.Parameters.AddWithValue($"@{curParam.Name}", curParam.Value ?? DBNull.Value);
+                                }
                             }
                         }
 
@@ -176,7 +183,14 @@ namespace SchoolDBWebAPI.Data.DBHelper
 
                             foreach (DBSQLParameter curParam in SQLParameters)
                             {
-                                sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                                if (curParam.Name.StartsWith('@'))
+                                {
+                                    sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                                }
+                                else
+                                {
+                                    sqlCommand.Parameters.AddWithValue($"@{curParam.Name}", curParam.Value ?? DBNull.Value);
+                                }
                             }
                         }
 
@@ -218,7 +232,14 @@ namespace SchoolDBWebAPI.Data.DBHelper
 
                             foreach (DBSQLParameter curParam in SQLParameters)
                             {
-                                sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                                if (curParam.Name.StartsWith('@'))
+                                {
+                                    sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                                }
+                                else
+                                {
+                                    sqlCommand.Parameters.AddWithValue($"@{curParam.Name}", curParam.Value ?? DBNull.Value);
+                                }
                             }
                         }
 
@@ -253,7 +274,14 @@ namespace SchoolDBWebAPI.Data.DBHelper
 
                             foreach (DBSQLParameter curParam in SQLParameters)
                             {
-                                sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                                if (curParam.Name.StartsWith('@'))
+                                {
+                                    sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                                }
+                                else
+                                {
+                                    sqlCommand.Parameters.AddWithValue($"@{curParam.Name}", curParam.Value ?? DBNull.Value);
+                                }
                             }
                         }
 
@@ -291,7 +319,14 @@ namespace SchoolDBWebAPI.Data.DBHelper
 
                             foreach (DBSQLParameter curParam in SQLParameters)
                             {
-                                sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                                if (curParam.Name.StartsWith('@'))
+                                {
+                                    sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                                }
+                                else
+                                {
+                                    sqlCommand.Parameters.AddWithValue($"@{curParam.Name}", curParam.Value ?? DBNull.Value);
+                                }
                             }
                         }
 
@@ -332,7 +367,14 @@ namespace SchoolDBWebAPI.Data.DBHelper
 
                             foreach (DBSQLParameter curParam in SQLParameters)
                             {
-                                sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                                if (curParam.Name.StartsWith('@'))
+                                {
+                                    sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                                }
+                                else
+                                {
+                                    sqlCommand.Parameters.AddWithValue($"@{curParam.Name}", curParam.Value ?? DBNull.Value);
+                                }
                             }
                         }
 
@@ -366,7 +408,14 @@ namespace SchoolDBWebAPI.Data.DBHelper
                             sqlCommand.CommandType = CommandType.StoredProcedure;
                             foreach (DBSQLParameter curParam in SQLParameters)
                             {
-                                sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                                if (curParam.Name.StartsWith('@'))
+                                {
+                                    sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                                }
+                                else
+                                {
+                                    sqlCommand.Parameters.AddWithValue($"@{curParam.Name}", curParam.Value ?? DBNull.Value);
+                                }
                             }
                         }
 
