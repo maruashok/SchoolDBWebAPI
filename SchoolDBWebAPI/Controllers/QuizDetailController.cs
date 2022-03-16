@@ -38,7 +38,7 @@ namespace SchoolDBWebAPI.Controllers
 
             try
             {
-                QuizDetail quizDetail = repository.GetByID(id);
+                QuizDetail quizDetail = repository.GetByIDAsync(id).Result;
 
                 if (quizDetail != null)
                 {
@@ -90,7 +90,28 @@ namespace SchoolDBWebAPI.Controllers
 
             try
             {
-                repository.DeleteById(id);
+                repository.DeleteByIdAsync(id);
+                response.Success = unitOfWork.SaveChanges() > 0;
+            }
+            catch (Exception Ex)
+            {
+                response.Success = false;
+                response.Message = Ex.Message;
+                logger.LogError(Ex, Ex.Message);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Route("deleteall")]
+        public IActionResult DeleteAll()
+        {
+            RequestResponse response = new RequestResponse();
+
+            try
+            {
+                repository.DeleteRange(data => data.Title.Contains("string"));
                 response.Success = unitOfWork.SaveChanges() > 0;
             }
             catch (Exception Ex)
