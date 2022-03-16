@@ -51,8 +51,9 @@ namespace SchoolDBWebAPI.Data.DBHelper
                 if (connection.State != ConnectionState.Open)
                 {
                     connection.Open();
-                    Result = connection.State == ConnectionState.Open;
                 }
+
+                Result = connection.State == ConnectionState.Open;
             }
             catch (Exception Ex)
             {
