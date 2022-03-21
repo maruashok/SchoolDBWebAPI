@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using SchoolDBWebAPI.Data.DBHelper;
 using SchoolDBWebAPI.Data.Interfaces;
 using SchoolDBWebAPI.Data.Repository;
+using SchoolDBWebAPI.Extensions;
 using Serilog;
 
 namespace SchoolDBWebAPI
@@ -35,7 +37,7 @@ namespace SchoolDBWebAPI
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
             if (env.IsDevelopment())
             {
@@ -43,6 +45,8 @@ namespace SchoolDBWebAPI
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SchoolDBWebAPI v1"));
             }
+
+            app.ConfigureExceptionHandler(logger);
 
             app.UseHttpsRedirection();
 

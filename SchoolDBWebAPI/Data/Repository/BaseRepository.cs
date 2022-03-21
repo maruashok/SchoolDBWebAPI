@@ -115,6 +115,12 @@ namespace SchoolDBWebAPI.Data.Repository
             return query.Any();
         }
 
+        /// <summary>
+        /// https://docs.microsoft.com/en-us/ef/core/querying/raw-sql
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
         public virtual IEnumerable<TEntity> GetWithRawSql(string query, params object[] parameters)
         {
             return dbSet.FromSqlRaw(query, parameters).ToList();

@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using SchoolDBWebAPI.Data.DBHelper;
 using SchoolDBWebAPI.Data.Interfaces;
-using SchoolDBWebAPI.Data.Repository;
 using SchoolDBWebAPI.DBModels;
 using SchoolDBWebAPI.Models;
 using SchoolDBWebAPI.Models.SP.Query;
 using SchoolDBWebAPI.Models.SP.Quiz;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 namespace SchoolDBWebAPI.Controllers
@@ -64,7 +65,10 @@ namespace SchoolDBWebAPI.Controllers
 
             try
             {
-                List<QuizDetail> quizDetail = repository.Get(data => data.Title.Contains(qry, StringComparison.InvariantCultureIgnoreCase)).ToList();
+                //List<QuizDetail> quizDetail = repository.Get(data => data.Title.Contains(qry, StringComparison.InvariantCultureIgnoreCase)).ToList();
+                //DataTable quizDetail = procedureManager.ExecuteSelect($@"Select * from QuizDetail where Title like '%' + @Qry +'%'", new SqlParameter("@Qry", qry));
+                //List<QuizDetail> quizDetail = procedureManager.ExecuteSelect<QuizDetail>($@"Select * from QuizDetail where Id = @Qry", new SqlParameter("@Qry", qry));
+                List<QuizDetail> quizDetail = procedureManager.ExecuteSelect<QuizDetail>($@"Select * from QuizDetail where Title like '%' + @Qry +'%'", new SqlParameter("@Qry", qry));
 
                 if (quizDetail != null)
                 {
