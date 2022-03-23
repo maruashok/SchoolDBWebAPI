@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 using SchoolDBWebAPI.Data.Interfaces;
 using SchoolDBWebAPI.DBModels;
+using Serilog;
 using System;
 
 namespace SchoolDBWebAPI.Data.Repository
@@ -10,10 +11,18 @@ namespace SchoolDBWebAPI.Data.Repository
         private SchoolDBContext context = new();
         private IDbContextTransaction _transaction;
         private BaseRepository<QuizDetail> _quizDetailsRepository;
+        private ILogger logger = Log.ForContext(typeof(UnitOfWork));
 
         public void BeginTransaction()
         {
-            _transaction = context.Database.BeginTransaction();
+            try
+            {
+                _transaction = context.Database.BeginTransaction();
+            }
+            catch (Exception Ex)
+            {
+                logger.Error(Ex, Ex.Message);
+            }
         }
 
         public IRepository<QuizDetail> QuizDetailRepository
@@ -31,23 +40,48 @@ namespace SchoolDBWebAPI.Data.Repository
 
         public int SaveChanges()
         {
-            return context.SaveChanges();
+            int RowsAffected = -1;
+
+            try
+            {
+                context.SaveChanges();
+            }
+            catch (Exception Ex)
+            {
+                logger.Error(Ex, Ex.Message);
+            }
+
+            return RowsAffected;
         }
 
         public void Commit()
         {
-            if (_transaction != null)
+            try
             {
-                _transaction.Commit();
+                if (_transaction != null)
+                {
+                    _transaction.Commit();
+                }
+            }
+            catch (Exception Ex)
+            {
+                logger.Error(Ex, Ex.Message);
             }
         }
 
         public void Rollback()
         {
-            if (_transaction != null)
+            try
             {
-                _transaction.Rollback();
-                _transaction.Dispose();
+                if (_transaction != null)
+                {
+                    _transaction.Rollback();
+                    _transaction.Dispose();
+                }
+            }
+            catch (Exception Ex)
+            {
+                logger.Error(Ex, Ex.Message);
             }
         }
 

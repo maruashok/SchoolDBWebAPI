@@ -116,17 +116,10 @@ namespace SchoolDBWebAPI.Controllers
             try
             {
                 unitOfWork.BeginTransaction();
-
-                try
-                {
-                    repository.DeleteRange(data => data.Title.Contains("string"));
-                    response.Success = unitOfWork.SaveChanges() > 0;
-                    unitOfWork.Commit();
-                }
-                catch (Exception)
-                {
-                    unitOfWork.Rollback();
-                }
+                repository.DeleteRange(data => data.Title.Contains("string"));
+                response.Success = unitOfWork.SaveChanges() > 0;
+                unitOfWork.Commit();
+                unitOfWork.Rollback();
             }
             catch (Exception Ex)
             {
