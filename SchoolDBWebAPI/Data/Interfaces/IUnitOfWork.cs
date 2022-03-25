@@ -13,6 +13,8 @@ namespace SchoolDBWebAPI.Data.Interfaces
 
         void BeginTransaction();
 
+        IRepository<T> GetRepository<T>() where T : class;
+
         IRepository<QuizDetail> QuizDetailRepository { get; }
     }
 }

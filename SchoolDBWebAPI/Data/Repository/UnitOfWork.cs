@@ -3,6 +3,7 @@ using SchoolDBWebAPI.Data.Interfaces;
 using SchoolDBWebAPI.DBModels;
 using Serilog;
 using System;
+using System.Collections.Generic;
 
 namespace SchoolDBWebAPI.Data.Repository
 {
@@ -23,6 +24,23 @@ namespace SchoolDBWebAPI.Data.Repository
             {
                 logger.Error(Ex, Ex.Message);
             }
+        }
+
+        public UnitOfWork()
+        {
+            context = new SchoolDBContext();
+        }
+
+        public IRepository<T> GetRepository<T>() where T : class
+        {
+            BaseRepository<T> repository = new BaseRepository<T>(context);
+
+            if (repository != null)
+            {
+                return repository;
+            }
+
+            return null;
         }
 
         public IRepository<QuizDetail> QuizDetailRepository
