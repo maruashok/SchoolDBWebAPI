@@ -1,14 +1,17 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using SchoolDBWebAPI.Data.DBHelper;
-using SchoolDBWebAPI.Data.Interfaces;
-using SchoolDBWebAPI.Data.Repository;
 using SchoolDBWebAPI.Extensions;
+using SchoolDBWebAPI.Services.DBModels;
+using SchoolDBWebAPI.Services.Interfaces;
+using SchoolDBWebAPI.Services.Repository;
+using SchoolDBWebAPI.Services.Services;
+using SchoolDBWebAPI.Services.SPHelper;
 using Serilog;
 
 namespace SchoolDBWebAPI
@@ -32,8 +35,13 @@ namespace SchoolDBWebAPI
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "SchoolDBWebAPI", Version = "v1" });
             });
 
+            services.AddDbContext<SchoolDBContext>(
+                    options => options.UseSqlServer(Configuration.GetConnectionString("Default")));
+
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IProcedureManager, ProcedureManager>();
+            services.AddScoped<IQuizDetailService, QuizDetailService>();
+            services.AddScoped<IQuizResultService, QuizResultService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
