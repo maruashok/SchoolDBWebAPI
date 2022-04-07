@@ -7,19 +7,17 @@ using System.Threading.Tasks;
 
 namespace SchoolDBWebAPI.Services.Services
 {
-    public class BaseService<TEntity> : QueryService<TEntity>, IQueryService<TEntity>, ICommandService<TEntity> where TEntity : class
+    public class BaseService<TEntity> : QueryService<TEntity>, IQueryService<TEntity>, IBaseService<TEntity> where TEntity : class
     {
         private readonly IUnitOfWork unitOfWork;
-        private readonly IRepository<TEntity> repository;
         private readonly ILogger logger = Log.ForContext<TEntity>();
 
         public BaseService(IUnitOfWork _unitOfWork) : base(_unitOfWork)
         {
             unitOfWork = _unitOfWork;
-            repository = _unitOfWork.GetRepository<TEntity>();
         }
 
-        public void Commit()
+        protected void Commit()
         {
             try
             {
@@ -27,11 +25,11 @@ namespace SchoolDBWebAPI.Services.Services
             }
             catch (Exception Ex)
             {
-                logger.Information(Ex, Ex.Message);
+                logger.Error(Ex, Ex.Message);
             }
         }
 
-        public void Rollback()
+        protected void Rollback()
         {
             try
             {
@@ -39,11 +37,11 @@ namespace SchoolDBWebAPI.Services.Services
             }
             catch (Exception Ex)
             {
-                logger.Information(Ex, Ex.Message);
+                logger.Error(Ex, Ex.Message);
             }
         }
 
-        public void BeginTransaction()
+        protected void BeginTransaction()
         {
             try
             {
@@ -51,11 +49,11 @@ namespace SchoolDBWebAPI.Services.Services
             }
             catch (Exception Ex)
             {
-                logger.Information(Ex, Ex.Message);
+                logger.Error(Ex, Ex.Message);
             }
         }
 
-        public int SaveChanges()
+        protected int SaveChanges()
         {
             int RowsAffected = -1;
 
@@ -65,118 +63,213 @@ namespace SchoolDBWebAPI.Services.Services
             }
             catch (Exception Ex)
             {
-                logger.Information(Ex, Ex.Message);
+                logger.Error(Ex, Ex.Message);
             }
 
             return RowsAffected;
         }
 
-        public void Insert(TEntity entity)
+        protected Task<int> SaveChangesAsync()
         {
+            Task<int> RowsAffected = default;
+
             try
             {
-                Repository.Insert(entity);
+                RowsAffected = unitOfWork.SaveChangesAsync();
             }
             catch (Exception Ex)
             {
-                logger.Information(Ex, Ex.Message);
+                logger.Error(Ex, Ex.Message);
             }
+
+            return RowsAffected;
         }
 
-        public void Delete(TEntity quizDetail)
+        public virtual int Delete(TEntity entityToDelete)
         {
+            int RowsAffected = default;
+
             try
             {
-                Repository.Delete(quizDetail);
+                Repository.Delete(entityToDelete);
+                RowsAffected = SaveChanges();
             }
             catch (Exception Ex)
             {
-                logger.Information(Ex, Ex.Message);
+                logger.Error(Ex, Ex.Message);
             }
+
+            return RowsAffected;
         }
 
-        public void DeleteById(object id)
+        public virtual int DeleteById(object id)
         {
+            int RowsAffected = default;
+
             try
             {
                 Repository.DeleteById(id);
+                RowsAffected = SaveChanges();
             }
             catch (Exception Ex)
             {
-                logger.Information(Ex, Ex.Message);
+                logger.Error(Ex, Ex.Message);
             }
+
+            return RowsAffected;
         }
 
-        public async Task DeleteByIdAsync(object id)
+        public virtual async Task<int> DeleteByIdAsync(object id)
         {
+            int RowsAffected = default;
+
             try
             {
-                await repository.DeleteByIdAsync(id);
+                await Repository.DeleteByIdAsync(id);
+                RowsAffected = await SaveChangesAsync();
             }
             catch (Exception Ex)
             {
-                logger.Information(Ex, Ex.Message);
+                logger.Error(Ex, Ex.Message);
             }
+
+            return RowsAffected;
         }
 
-        public void DeleteRange(Expression<Func<TEntity, bool>> filter)
+        public virtual int DeleteRange(Expression<Func<TEntity, bool>> filter)
         {
+            int RowsAffected = default;
+
             try
             {
-                repository.DeleteRange(filter);
+                Repository.DeleteRange(filter);
+                RowsAffected = SaveChanges();
             }
             catch (Exception Ex)
             {
-                logger.Information(Ex, Ex.Message);
+                logger.Error(Ex, Ex.Message);
             }
+
+            return RowsAffected;
         }
 
-        public async Task InsertAsync(TEntity entity)
+        public virtual async Task<int> DeleteRangeAsync(Expression<Func<TEntity, bool>> filter)
         {
+            int RowsAffected = default;
+
             try
             {
-                await repository.InsertAsync(entity);
+                Repository.DeleteRange(filter);
+                RowsAffected = await SaveChangesAsync();
             }
             catch (Exception Ex)
             {
-                logger.Information(Ex, Ex.Message);
+                logger.Error(Ex, Ex.Message);
             }
+
+            return RowsAffected;
         }
 
-        public void InsertRange(List<TEntity> entities)
+        public virtual int Insert(TEntity entity)
         {
+            int RowsAffected = default;
+
             try
             {
-                repository.InsertRange(entities);
+                Repository.Insert(entity);
+                RowsAffected = SaveChanges();
             }
             catch (Exception Ex)
             {
-                logger.Information(Ex, Ex.Message);
+                logger.Error(Ex, Ex.Message);
             }
+
+            return RowsAffected;
         }
 
-        public async Task InsertRangeAsync(List<TEntity> entities)
+        public virtual async Task<int> InsertAsync(TEntity entity)
         {
+            int RowsAffected = default;
+
             try
             {
-                await repository.InsertRangeAsync(entities);
+                await Repository.InsertAsync(entity);
+                RowsAffected = await SaveChangesAsync();
             }
             catch (Exception Ex)
             {
-                logger.Information(Ex, Ex.Message);
+                logger.Error(Ex, Ex.Message);
             }
+
+            return RowsAffected;
         }
 
-        public void Update(TEntity entityToUpdate)
+        public virtual int InsertRange(List<TEntity> entities)
         {
+            int RowsAffected = default;
+
             try
             {
-                repository.Update(entityToUpdate);
+                Repository.InsertRange(entities);
+                RowsAffected = SaveChanges();
             }
             catch (Exception Ex)
             {
-                logger.Information(Ex, Ex.Message);
+                logger.Error(Ex, Ex.Message);
             }
+
+            return RowsAffected;
+        }
+
+        public virtual async Task<int> InsertRangeAsync(List<TEntity> entities)
+        {
+            int RowsAffected = default;
+
+            try
+            {
+                await Repository.InsertRangeAsync(entities);
+                RowsAffected = await SaveChangesAsync();
+            }
+            catch (Exception Ex)
+            {
+                logger.Error(Ex, Ex.Message);
+            }
+
+            return RowsAffected;
+        }
+
+        public virtual bool Update(TEntity entityToUpdate)
+        {
+            bool IsSaved = default;
+
+            try
+            {
+                Repository.Update(entityToUpdate);
+                IsSaved = SaveChanges() > 0;
+            }
+            catch (Exception Ex)
+            {
+                logger.Error(Ex, Ex.Message);
+            }
+
+            return IsSaved;
+        }
+
+        public virtual async Task<bool> UpdateAsync(TEntity entityToUpdate)
+        {
+            bool IsSaved = default;
+
+            try
+            {
+                Repository.Update(entityToUpdate);
+                IsSaved = await SaveChangesAsync() > 0;
+            }
+            catch (Exception Ex)
+            {
+                logger.Error(Ex, Ex.Message);
+            }
+
+            return IsSaved;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace SchoolDBWebAPI.Services.Interfaces
 {
@@ -9,6 +10,8 @@ namespace SchoolDBWebAPI.Services.Interfaces
         void Rollback();
 
         int SaveChanges();
+
+        Task<int> SaveChangesAsync();
 
         void BeginTransaction();
 

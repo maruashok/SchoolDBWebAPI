@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -13,6 +14,10 @@ namespace SchoolDBWebAPI.Services.Interfaces
         void DeleteById(object id);
 
         Task DeleteByIdAsync(object id);
+
+        EntityEntry<TEntity> GetEntityEntry(TEntity entity);
+
+        void SetEntityValues(TEntity entity, object Values);
 
         IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = null, int? skip = null, int? take = null);
 

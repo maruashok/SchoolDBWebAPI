@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SchoolDBWebAPI.Services.DBModels;
 using SchoolDBWebAPI.Services.Interfaces;
 using System;
@@ -34,6 +35,16 @@ namespace SchoolDBWebAPI.Services.Repository
         public virtual void Insert(TEntity entity)
         {
             dbSet.Add(entity);
+        }
+
+        public virtual void SetEntityValues(TEntity entity, object Values)
+        {
+            GetEntityEntry(entity).CurrentValues.SetValues(Values);
+        }
+
+        public virtual EntityEntry<TEntity> GetEntityEntry(TEntity entity)
+        {
+            return context.Entry(entity);
         }
 
         public virtual async Task DeleteByIdAsync(object id)
@@ -154,8 +165,7 @@ namespace SchoolDBWebAPI.Services.Repository
             }
 
             includeProperties ??= string.Empty;
-            foreach (var includeProperty in includeProperties.Split
-                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 query = query.Include(includeProperty);
             }
@@ -173,8 +183,7 @@ namespace SchoolDBWebAPI.Services.Repository
             }
 
             includeProperties ??= string.Empty;
-            foreach (var includeProperty in includeProperties.Split
-                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 query = query.Include(includeProperty);
             }

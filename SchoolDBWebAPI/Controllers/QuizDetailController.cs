@@ -9,6 +9,7 @@ using SchoolDBWebAPI.Services.SPHelper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SchoolDBWebAPI.Controllers
 {
@@ -34,6 +35,32 @@ namespace SchoolDBWebAPI.Controllers
             try
             {
                 QuizDetail quizDetail = service.GetByIDAsync(id).Result;
+
+                if (quizDetail != null)
+                {
+                    response.Success = true;
+                    response.Data = quizDetail;
+                    logger.LogInformation("Details loaded");
+                }
+            }
+            catch (Exception Ex)
+            {
+                response.Success = false;
+                response.Message = Ex.Message;
+                logger.LogError(Ex, Ex.Message);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpGet("quiz/{id}")]
+        public async Task<IActionResult> GetWithQuesAsync(int id)
+        {
+            RequestResponse response = new();
+
+            try
+            {
+                QuizDetail quizDetail = await service.QuizWithQuesAsync(id);
 
                 if (quizDetail != null)
                 {
@@ -79,14 +106,13 @@ namespace SchoolDBWebAPI.Controllers
 
         // DELETE api/<QuizDetail>/5
         [HttpDelete("delete/{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteAsync(int id)
         {
             RequestResponse response = new();
 
             try
             {
-                service.DeleteByIdAsync(id);
-                response.Success = service.SaveChanges() > 0;
+                response.Success = await service.DeleteByIdAsync(id) > 0;
             }
             catch (Exception Ex)
             {
@@ -106,14 +132,10 @@ namespace SchoolDBWebAPI.Controllers
 
             try
             {
-                service.BeginTransaction();
-                service.DeleteRange(data => data.Title.Contains("string"));
-                response.Success = service.SaveChanges() > 0;
-                service.Commit();
+                response.Success = service.DeleteRange(data => data.Title.Contains("string")) > 0;
             }
             catch (Exception Ex)
             {
-                service.Rollback();
                 response.Success = false;
                 response.Message = Ex.Message;
                 logger.LogError(Ex, Ex.Message);
@@ -140,11 +162,12 @@ namespace SchoolDBWebAPI.Controllers
                     new DBSQLParameter("@Description", model.Description)
                 };
 
-                List<QuizDetail> QuizDetail = service.AddQuiz(paramList);
+                QuizDetail quizDetail = service.AddQuiz(paramList);
 
-                if (QuizDetail != null && QuizDetail.FirstOrDefault() != null)
+                if (quizDetail != null)
                 {
                     response.Success = true;
+                    response.Data = quizDetail;
                     response.Message = "Quiz Added Successfully";
                 }
                 else
@@ -170,9 +193,9 @@ namespace SchoolDBWebAPI.Controllers
 
             try
             {
-                service.Insert(model);
+                ;
 
-                if (service.SaveChanges() > 0)
+                if (service.Insert(model) > 0)
                 {
                     response.Success = true;
                     response.Message = "Quiz Added Successfully";
@@ -180,6 +203,34 @@ namespace SchoolDBWebAPI.Controllers
                 else
                 {
                     response.Message = "Failed to Add Quiz Details";
+                }
+            }
+            catch (Exception Ex)
+            {
+                response.Success = false;
+                response.Message = Ex.Message;
+                logger.LogError(Ex, Ex.Message);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("update")]
+        public async Task<IActionResult> UpdateAsync(QuizDetail model)
+        {
+            RequestResponse response = new();
+
+            try
+            {
+                if (await service.UpdateAsync(model))
+                {
+                    response.Success = true;
+                    response.Message = "Quiz Updated Successfully";
+                }
+                else
+                {
+                    response.Message = "Failed to Updated Quiz Details";
                 }
             }
             catch (Exception Ex)

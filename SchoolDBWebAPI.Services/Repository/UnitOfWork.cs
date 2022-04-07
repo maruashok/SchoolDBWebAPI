@@ -5,6 +5,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SchoolDBWebAPI.Services.Repository
 {
@@ -68,6 +69,22 @@ namespace SchoolDBWebAPI.Services.Repository
             try
             {
                 RowsAffected = context.SaveChanges();
+            }
+            catch (Exception Ex)
+            {
+                logger.Error(Ex, Ex.Message);
+            }
+
+            return RowsAffected;
+        }
+
+        public Task<int> SaveChangesAsync()
+        {
+            Task<int> RowsAffected = default;
+
+            try
+            {
+                RowsAffected = context.SaveChangesAsync();
             }
             catch (Exception Ex)
             {
