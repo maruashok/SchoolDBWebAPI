@@ -170,38 +170,34 @@ namespace SchoolDBWebAPI.Services.Services
             return RowsAffected;
         }
 
-        public virtual int Insert(TEntity entity)
+        public virtual TEntity Insert(TEntity entity)
         {
-            int RowsAffected = default;
-
             try
             {
                 Repository.Insert(entity);
-                RowsAffected = SaveChanges();
+                SaveChanges();
             }
             catch (Exception Ex)
             {
                 logger.Error(Ex, Ex.Message);
             }
 
-            return RowsAffected;
+            return entity;
         }
 
-        public virtual async Task<int> InsertAsync(TEntity entity)
+        public virtual async Task<TEntity> InsertAsync(TEntity entity)
         {
-            int RowsAffected = default;
-
             try
             {
                 await Repository.InsertAsync(entity);
-                RowsAffected = await SaveChangesAsync();
+                await SaveChangesAsync();
             }
             catch (Exception Ex)
             {
                 logger.Error(Ex, Ex.Message);
             }
 
-            return RowsAffected;
+            return entity;
         }
 
         public virtual int InsertRange(List<TEntity> entities)

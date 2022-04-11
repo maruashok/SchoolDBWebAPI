@@ -23,7 +23,7 @@ namespace SchoolDBWebAPI.Services.Services
             get { return repository; }
         }
 
-        public TEntity GetByID(object id)
+        public virtual TEntity GetByID(object id)
         {
             TEntity result = default;
 
@@ -39,7 +39,7 @@ namespace SchoolDBWebAPI.Services.Services
             return result;
         }
 
-        public Task<TEntity> GetByIDAsync(object id)
+        public virtual Task<TEntity> GetByIDAsync(object id)
         {
             Task<TEntity> objResult = default;
 
@@ -55,7 +55,7 @@ namespace SchoolDBWebAPI.Services.Services
             return objResult;
         }
 
-        public int GetCount(Expression<Func<TEntity, bool>> filter = null)
+        public virtual int GetCount(Expression<Func<TEntity, bool>> filter = null)
         {
             int RowsAffected = -1;
 
@@ -71,7 +71,7 @@ namespace SchoolDBWebAPI.Services.Services
             return RowsAffected;
         }
 
-        public Task<int> GetCountAsync(Expression<Func<TEntity, bool>> filter = null)
+        public virtual Task<int> GetCountAsync(Expression<Func<TEntity, bool>> filter = null)
         {
             Task<int> result = default;
 
@@ -87,7 +87,7 @@ namespace SchoolDBWebAPI.Services.Services
             return result;
         }
 
-        public bool IsExists(Expression<Func<TEntity, bool>> filter = null)
+        public virtual bool IsExists(Expression<Func<TEntity, bool>> filter = null)
         {
             bool result = default;
 
@@ -103,7 +103,7 @@ namespace SchoolDBWebAPI.Services.Services
             return result;
         }
 
-        public Task<bool> GetExistsAsync(Expression<Func<TEntity, bool>> filter = null)
+        public virtual Task<bool> GetExistsAsync(Expression<Func<TEntity, bool>> filter = null)
         {
             Task<bool> result = default;
 
@@ -119,7 +119,7 @@ namespace SchoolDBWebAPI.Services.Services
             return result;
         }
 
-        public TEntity GetFirst(Expression<Func<TEntity, bool>> filter = null, string includeProperties = null)
+        public virtual TEntity GetFirst(Expression<Func<TEntity, bool>> filter = null, string includeProperties = null)
         {
             TEntity result = default;
 
@@ -135,7 +135,7 @@ namespace SchoolDBWebAPI.Services.Services
             return result;
         }
 
-        public Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>> filter = null, string includeProperties = null)
+        public virtual Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>> filter = null, string includeProperties = null)
         {
             Task<TEntity> result = default;
 
@@ -151,7 +151,7 @@ namespace SchoolDBWebAPI.Services.Services
             return result;
         }
 
-        public IEnumerable<TEntity> GetWithRawSql(string query, params object[] parameters)
+        public virtual IEnumerable<TEntity> GetWithRawSql(string query, params object[] parameters)
         {
             IEnumerable<TEntity> result = default;
 
@@ -167,7 +167,7 @@ namespace SchoolDBWebAPI.Services.Services
             return result;
         }
 
-        public IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = null, int? skip = null, int? take = null)
+        public virtual IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = null, int? skip = null, int? take = null)
         {
             IEnumerable<TEntity> result = default;
 

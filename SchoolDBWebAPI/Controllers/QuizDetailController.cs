@@ -193,9 +193,7 @@ namespace SchoolDBWebAPI.Controllers
 
             try
             {
-                ;
-
-                if (service.Insert(model) > 0)
+                if (service.Insert(model).Id > 0)
                 {
                     response.Success = true;
                     response.Message = "Quiz Added Successfully";
