@@ -2,7 +2,6 @@ using SchoolDBWebAPI.Services.DBModels;
 using SchoolDBWebAPI.Services.Interfaces;
 using SchoolDBWebAPI.Services.Repository;
 using SchoolDBWebAPI.Services.Services;
-using SchoolDBWebAPI.Services.SPHelper;
 using Xunit;
 
 namespace SchoolDBWebAPI.Services.Test
@@ -26,9 +25,9 @@ namespace SchoolDBWebAPI.Services.Test
 
             if (dBContext != null)
             {
-                IUnitOfWork unitOfWork = new UnitOfWork(dBContext);
-                IProcedureManager procedureManager = new ProcedureManager();
-                IQuizDetailService service = new QuizDetailService(unitOfWork, procedureManager);
+                database.ClearDatabase();
+                IQuizRepository repository = new QuizRepository(dBContext);
+                IQuizDetailService service = new QuizDetailService(repository);
 
                 if (service.Insert(quizDetailORG).Id > 0)
                 {
@@ -47,12 +46,10 @@ namespace SchoolDBWebAPI.Services.Test
 
             if (dBContext != null)
             {
-                IUnitOfWork unitOfWork = new UnitOfWork(dBContext);
-                IProcedureManager procedureManager = new ProcedureManager();
-                IQuizDetailService quizDetailService = new QuizDetailService(unitOfWork, procedureManager);
+                IQuizRepository repository = new QuizRepository(dBContext);
+                IQuizDetailService service = new QuizDetailService(repository);
 
-                QuizDetail quizDetail = quizDetailService.GetByID(2005);
-
+                QuizDetail quizDetail = service.GetByID(2005);
                 Assert.Equal(quizDetailORG.Id, quizDetail.Id);
             }
         }
@@ -65,11 +62,10 @@ namespace SchoolDBWebAPI.Services.Test
 
             if (dBContext != null)
             {
-                IUnitOfWork unitOfWork = new UnitOfWork(dBContext);
-                IProcedureManager procedureManager = new ProcedureManager();
-                IQuizDetailService quizDetailService = new QuizDetailService(unitOfWork, procedureManager);
+                IQuizRepository repository = new QuizRepository(dBContext);
+                IQuizDetailService service = new QuizDetailService(repository);
 
-                QuizDetail quizDetail = quizDetailService.GetFirst(data => data.Title.Contains(quizDetailORG.Title));
+                QuizDetail quizDetail = service.GetFirst(data => data.Title.Contains(quizDetailORG.Title));
 
                 if (quizDetail != null)
                 {
@@ -87,11 +83,10 @@ namespace SchoolDBWebAPI.Services.Test
 
             if (dBContext != null)
             {
-                IUnitOfWork unitOfWork = new UnitOfWork(dBContext);
-                IProcedureManager procedureManager = new ProcedureManager();
-                IQuizDetailService service = new QuizDetailService(unitOfWork, procedureManager);
+                IQuizRepository repository = new QuizRepository(dBContext);
+                IQuizDetailService service = new QuizDetailService(repository);
 
-                if (service.Delete(quizDetailORG) > 0)
+                if (service.DeleteByID(quizDetailORG.Id))
                 {
                     quizDetail = service.GetByID(quizDetailORG.Id);
                 }

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SchoolDBWebAPI.Services.DBModels;
+using System.Collections.Generic;
 using System.IO;
 
 namespace SchoolDBWebAPI.Services.Test
@@ -18,6 +19,20 @@ namespace SchoolDBWebAPI.Services.Test
             }
 
             return quizDetail;
+        }
+
+        public static List<QuizDetail> GetQuizDetails()
+        {
+            List<QuizDetail> quizDetails = default;
+
+            string JsonData = File.ReadAllText(@"JsonFiles\QuizController\Quizes.txt");
+
+            if (!string.IsNullOrEmpty(JsonData))
+            {
+                quizDetails = JsonConvert.DeserializeObject<List<QuizDetail>>(JsonData);
+            }
+
+            return quizDetails;
         }
     }
 }

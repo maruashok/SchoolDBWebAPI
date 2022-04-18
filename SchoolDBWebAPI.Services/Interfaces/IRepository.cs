@@ -1,23 +1,26 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using SchoolDBWebAPI.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace SchoolDBWebAPI.Services.Interfaces
+namespace SchoolDBWebAPI.Services.Repository
 {
-    public interface IRepository<TEntity> where TEntity : class
+    public interface IRepository<TEntity> : IProcedureManager where TEntity : class
     {
+        void BeginTransaction();
+
+        void Commit();
+
         void Delete(TEntity entityToDelete);
 
         void DeleteById(object id);
 
         Task DeleteByIdAsync(object id);
 
-        EntityEntry<TEntity> GetEntityEntry(TEntity entity);
-
-        void SetEntityValues(TEntity entity, object Values);
+        void DeleteRange(Expression<Func<TEntity, bool>> filter);
 
         IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = null, int? skip = null, int? take = null);
 
@@ -25,13 +28,11 @@ namespace SchoolDBWebAPI.Services.Interfaces
 
         Task<TEntity> GetByIDAsync(object id);
 
-        void DeleteRange(Expression<Func<TEntity, bool>> filter);
-
         int GetCount(Expression<Func<TEntity, bool>> filter = null);
 
         Task<int> GetCountAsync(Expression<Func<TEntity, bool>> filter = null);
 
-        bool IsExists(Expression<Func<TEntity, bool>> filter = null);
+        EntityEntry<TEntity> GetEntityEntry(TEntity entity);
 
         Task<bool> GetExistsAsync(Expression<Func<TEntity, bool>> filter = null);
 
@@ -45,9 +46,21 @@ namespace SchoolDBWebAPI.Services.Interfaces
 
         Task InsertAsync(TEntity entity);
 
+        IQueryable<TEntity> GetQueryable();
+
         void InsertRange(List<TEntity> entities);
 
         Task InsertRangeAsync(List<TEntity> entities);
+
+        bool IsExists(Expression<Func<TEntity, bool>> filter = null);
+
+        void Rollback();
+
+        int SaveChanges();
+
+        Task<int> SaveChangesAsync();
+
+        void SetEntityValues(TEntity entity, object Values);
 
         void Update(TEntity entityToUpdate);
     }

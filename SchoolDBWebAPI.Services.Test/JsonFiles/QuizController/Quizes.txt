@@ -1,0 +1,57 @@
+[
+	{
+		"Id": 1,
+		"CreatorId": -1,
+		"Title": "Quiz March",
+		"PaidQuiz": "N",
+		"Description": "First quiz of March-2022",
+		"StartDate": "2022-03-01T00:00:00",
+		"EndDate": "2022-03-31T00:00:00",
+		"QuizQuestions": [],
+		"QuizResponses": []
+	},
+	{
+		"Id": 2,
+		"CreatorId": -1,
+		"Title": "Quiz March",
+		"PaidQuiz": "N",
+		"Description": "First quiz of March-2022",
+		"StartDate": "2022-03-01T00:00:00",
+		"EndDate": "2022-03-31T00:00:00",
+		"QuizQuestions": [],
+		"QuizResponses": []
+	},
+	{
+		"Id": 3,
+		"CreatorId": -1,
+		"Title": "Quiz March 11",
+		"PaidQuiz": "N",
+		"Description": "First quiz of March-2022",
+		"StartDate": "2022-03-01T00:00:00",
+		"EndDate": "2022-03-31T00:00:00",
+		"QuizQuestions": [],
+		"QuizResponses": []
+	},
+	{
+		"Id": 4,
+		"CreatorId": -1,
+		"Title": "Quiz March",
+		"PaidQuiz": "N",
+		"Description": "First quiz of March-2022",
+		"StartDate": "2022-03-01T00:00:00",
+		"EndDate": "2022-03-31T00:00:00",
+		"QuizQuestions": [],
+		"QuizResponses": []
+	},
+	{
+		"Id": 5,
+		"CreatorId": -1,
+		"Title": "Quiz March",
+		"PaidQuiz": "N",
+		"Description": "First quiz of March-2022",
+		"StartDate": "2022-03-01T00:00:00",
+		"EndDate": "2022-03-31T00:00:00",
+		"QuizQuestions": [],
+		"QuizResponses": []
+	}
+]

@@ -1,10 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using SchoolDBWebAPI.Services.DBModels;
-using SchoolDBWebAPI.Services.Interfaces;
-using SchoolDBWebAPI.Services.Repository;
-using SchoolDBWebAPI.Services.Services;
-using SchoolDBWebAPI.Services.SPHelper;
 using System;
 using System.IO;
 
@@ -20,6 +16,19 @@ namespace SchoolDBWebAPI.Services.Test
             dBContext = new(new DbContextOptionsBuilder<SchoolDBContext>().UseInMemoryDatabase("SchoolDB").Options);
         }
 
+        public void ClearDatabase()
+        {
+            try
+            {
+                dBContext.Database.EnsureDeleted();
+                dBContext.Database.EnsureCreated();
+            }
+            catch (Exception Ex)
+            {
+                throw;
+            }
+        }
+
         public bool FeedData()
         {
             bool Status = false;
@@ -29,13 +38,11 @@ namespace SchoolDBWebAPI.Services.Test
             {
                 QuizDetail quizDetail = JsonConvert.DeserializeObject<QuizDetail>(JsonData);
 
-                if (dBContext != null)
+                if (quizDetail != null)
                 {
-                    IUnitOfWork unitOfWork = new UnitOfWork(dBContext);
-                    IProcedureManager procedureManager = new ProcedureManager();
-                    IQuizDetailService service = new QuizDetailService(unitOfWork, procedureManager);
-
-                    Status = service.Insert(quizDetail).Id > 0;
+                    ClearDatabase();
+                    dBContext.QuizDetails.Add(quizDetail);
+                    Status = dBContext.SaveChanges() > 0;
                 }
             }
 

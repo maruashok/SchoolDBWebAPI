@@ -18,9 +18,9 @@ namespace SchoolDBWebAPI.Services.SPHelper
         private SchoolDBContext dbContext;
         private readonly ILogger logger = Log.ForContext(typeof(ProcedureManager));
 
-        public ProcedureManager()
+        public ProcedureManager(SchoolDBContext _dBContext)
         {
-            dbContext = new SchoolDBContext();
+            dbContext = _dBContext;
         }
 
         private bool OpenConnection(SqlConnection connection)

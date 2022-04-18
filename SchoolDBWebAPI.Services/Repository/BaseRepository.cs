@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage;
 using SchoolDBWebAPI.Services.DBModels;
-using SchoolDBWebAPI.Services.Interfaces;
+using SchoolDBWebAPI.Services.SPHelper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,15 +11,21 @@ using System.Threading.Tasks;
 
 namespace SchoolDBWebAPI.Services.Repository
 {
-    public class BaseRepository<TEntity> : IRepository<TEntity> where TEntity : class
+    public class BaseRepository<TEntity> : ProcedureManager, IRepository<TEntity> where TEntity : class
     {
-        internal DbSet<TEntity> dbSet;
-        internal SchoolDBContext context;
+        private DbSet<TEntity> dbSet;
+        private SchoolDBContext context;
+        private IDbContextTransaction transaction;
 
-        public BaseRepository(SchoolDBContext context)
+        public BaseRepository(SchoolDBContext context) : base(context)
         {
             this.context = context;
             this.dbSet = context.Set<TEntity>();
+        }
+
+        public IQueryable<TEntity> GetQueryable()
+        {
+            return dbSet;
         }
 
         public virtual void DeleteById(object id)
@@ -157,7 +164,7 @@ namespace SchoolDBWebAPI.Services.Repository
 
         public virtual TEntity GetFirst(Expression<Func<TEntity, bool>> filter = null, string includeProperties = null)
         {
-            IQueryable<TEntity> query = dbSet;
+            IQueryable<TEntity> query = GetQueryable();
 
             if (filter != null)
             {
@@ -225,6 +232,38 @@ namespace SchoolDBWebAPI.Services.Repository
             }
 
             return query;
+        }
+
+        public void BeginTransaction()
+        {
+            transaction = context.Database.BeginTransaction();
+        }
+
+        public int SaveChanges()
+        {
+            return context.SaveChanges();
+        }
+
+        public Task<int> SaveChangesAsync()
+        {
+            return context.SaveChangesAsync();
+        }
+
+        public void Commit()
+        {
+            if (transaction != null)
+            {
+                transaction.Commit();
+            }
+        }
+
+        public void Rollback()
+        {
+            if (transaction != null)
+            {
+                transaction.Rollback();
+                transaction.Dispose();
+            }
         }
     }
 }

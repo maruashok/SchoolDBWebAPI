@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using SchoolDBWebAPI.Models;
 using SchoolDBWebAPI.Services.DBModels;
+using SchoolDBWebAPI.Services.Interfaces;
 using SchoolDBWebAPI.Services.Models.SP.Query;
 using SchoolDBWebAPI.Services.Models.SP.Quiz;
 using SchoolDBWebAPI.Services.Services;
@@ -34,7 +35,7 @@ namespace SchoolDBWebAPI.Controllers
 
             try
             {
-                QuizDetail quizDetail = service.GetByIDAsync(id).Result;
+                QuizDetail quizDetail = service.GetByID(id);
 
                 if (quizDetail != null)
                 {
@@ -106,13 +107,13 @@ namespace SchoolDBWebAPI.Controllers
 
         // DELETE api/<QuizDetail>/5
         [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> DeleteAsync(int id)
+        public IActionResult Delete(int id)
         {
             RequestResponse response = new();
 
             try
             {
-                response.Success = await service.DeleteByIdAsync(id) > 0;
+                response.Success = service.DeleteByID(id);
             }
             catch (Exception Ex)
             {
