@@ -15,7 +15,7 @@ namespace SchoolDBWebAPI.Services.SPHelper
     public class ProcedureManager : IProcedureManager
     {
         private bool disposed = false;
-        private SchoolDBContext dbContext;
+        private readonly SchoolDBContext dbContext;
         private readonly ILogger logger = Log.ForContext(typeof(ProcedureManager));
 
         public ProcedureManager(SchoolDBContext _dBContext)

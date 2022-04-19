@@ -11,10 +11,10 @@ using System.Threading.Tasks;
 
 namespace SchoolDBWebAPI.Services.Repository
 {
-    public class BaseRepository<TEntity> : ProcedureManager, IRepository<TEntity> where TEntity : class
+    public abstract class BaseRepository<TEntity> : ProcedureManager, IRepository<TEntity> where TEntity : class
     {
-        private DbSet<TEntity> dbSet;
-        private SchoolDBContext context;
+        private readonly DbSet<TEntity> dbSet;
+        private readonly SchoolDBContext context;
         private IDbContextTransaction transaction;
 
         public BaseRepository(SchoolDBContext context) : base(context)

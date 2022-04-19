@@ -7,11 +7,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using SchoolDBWebAPI.Dependency;
 using SchoolDBWebAPI.Extensions;
 using SchoolDBWebAPI.Services.DBModels;
-using SchoolDBWebAPI.Services.Interfaces;
-using SchoolDBWebAPI.Services.Services;
-using SchoolDBWebAPI.Services.SPHelper;
 using Serilog;
 
 namespace SchoolDBWebAPI
@@ -43,9 +41,8 @@ namespace SchoolDBWebAPI
             services.AddDbContext<SchoolDBContext>(
                     options => options.UseSqlServer(Configuration.GetConnectionString("Default")));
 
-            services.AddScoped<IProcedureManager, ProcedureManager>();
-            services.AddScoped<IQuizDetailService, QuizDetailService>();
-            services.AddScoped<IQuizQuesRepository, QuizQuesRepository>();
+            services.AddRepositories();
+            services.AddRepoServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
