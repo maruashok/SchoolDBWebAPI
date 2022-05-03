@@ -20,16 +20,18 @@ namespace SchoolDBWebAPI.Services.Repository
 
         public bool IsQuizExists(int QuizId)
         {
+            bool IsExists = false;
+
             try
             {
-                return GetFirst(quiz => quiz.Id == QuizId) != null;
+                IsExists = GetFirst(quiz => quiz.Id == QuizId) != null;
             }
             catch (Exception Ex)
             {
-                logger.LogError
-                throw;
+                logger.LogError(Ex, Ex.Message);
             }
-            logger.LogInformation("Get Quiz By Id :- ", QuizId);
+
+            return IsExists;
         }
     }
 }
