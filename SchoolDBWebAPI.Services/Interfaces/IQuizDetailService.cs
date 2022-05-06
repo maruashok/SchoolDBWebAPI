@@ -18,6 +18,8 @@ namespace SchoolDBWebAPI.Services.Interfaces
 
         List<QuizDetail> GetAllQuiz();
 
+        QuizDetail GetQuizById(int QuizId);
+
         QuizDetail SearchQuiz(string QuizTitle);
 
         QuizDetail Insert(QuizDetail quizDetail);
@@ -33,7 +35,5 @@ namespace SchoolDBWebAPI.Services.Interfaces
         int DeleteRange(Expression<Func<QuizDetail, bool>> filter);
 
         List<QuizDetail> ListAllQuiz(Qry_SP_StudentMasterSelect model);
-
-        QuizDetail GetFirst(Expression<Func<QuizDetail, bool>> filter = null, string includeProperties = null);
     }
 }

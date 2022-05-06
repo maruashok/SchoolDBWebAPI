@@ -6,6 +6,7 @@ using SchoolDBWebAPI.Services.Repository;
 using SchoolDBWebAPI.Services.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using Xunit;
 
@@ -38,11 +39,25 @@ namespace SchoolDBWebAPI.Services.Test
         }
 
         [Fact]
+        public void Test_GetFirst()
+        {
+            repoMock.Setup(quiz => quiz.GetFirst(x => x.Id == 1 && x.Title.Contains("March"), It.IsAny<string>())).Returns(quizDetail);
+
+            IQuizDetailService service = new QuizDetailService(repoMock.Object);
+
+            if (service != null)
+            {
+                QuizDetail quiz = service.GetQuizById(1);
+                Assert.NotNull(quiz);
+                Assert.Equal(quizDetail.Id, quiz.Id);
+            }
+        }
+
+        [Fact]
         public void Test_SearchQuiz()
         {
             var queryMock = quizDetails.BuildMock();
             repoMock.Setup(mock => mock.GetQueryable()).Returns(queryMock);
-
             IQuizDetailService service = new QuizDetailService(repoMock.Object);
             repoMock.Setup(quiz => quiz.GetFirst(It.IsAny<Expression<Func<QuizDetail, bool>>>(), It.IsAny<string>())).Returns(quizDetail);
 

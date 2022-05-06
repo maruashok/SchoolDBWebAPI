@@ -111,9 +111,9 @@ namespace SchoolDBWebAPI.Services.Services
             return quizDetail;
         }
 
-        public QuizDetail GetFirst(Expression<Func<QuizDetail, bool>> filter = null, string includeProperties = null)
+        public QuizDetail GetQuizById(int QuizId)
         {
-            return Repository.GetFirst(filter, includeProperties);
+            return Repository.GetFirst(quiz => quiz.Id == QuizId && quiz.Title.Contains("March"));
         }
 
         public bool DeleteByID(int QuizId)
