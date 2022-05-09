@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using System;
 
 namespace SchoolDBWebAPI
 {
@@ -16,7 +17,7 @@ namespace SchoolDBWebAPI
                 .UseSerilog()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>().UseContentRoot(AppContext.BaseDirectory);
                 });
     }
 }
