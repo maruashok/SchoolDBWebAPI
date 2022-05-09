@@ -41,7 +41,8 @@ namespace SchoolDBWebAPI.Services.Test
         [Fact]
         public void Test_GetFirst()
         {
-            repoMock.Setup(quiz => quiz.GetFirst(x => x.Id == 1 && x.Title.Contains("March"), It.IsAny<string>())).Returns(quizDetail);
+            repoMock.Setup(mock => mock.GetByID(1)).Returns(quizDetail);
+            repoMock.Setup(quiz => quiz.GetFirst(quiz => quiz.Title.Contains(quizDetail.Title) && quiz.Id != quizDetail.Id, It.IsAny<string>())).Returns(quizDetail);
 
             IQuizDetailService service = new QuizDetailService(repoMock.Object);
 

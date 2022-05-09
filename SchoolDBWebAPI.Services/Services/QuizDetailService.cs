@@ -113,7 +113,14 @@ namespace SchoolDBWebAPI.Services.Services
 
         public QuizDetail GetQuizById(int QuizId)
         {
-            return Repository.GetFirst(quiz => quiz.Id == QuizId && quiz.Title.Contains("March"));
+            QuizDetail quiz = Repository.GetFirst(quiz => quiz.Title.Contains("March") && quiz.Id != QuizId);
+
+            if (quiz != null)
+            {
+                quiz = Repository.GetByID(quiz.Id);
+            }
+
+            return quiz;
         }
 
         public bool DeleteByID(int QuizId)
