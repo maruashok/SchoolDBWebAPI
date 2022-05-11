@@ -94,14 +94,20 @@ namespace SchoolDBWebAPI.Services.Repository
                         {
                             foreach (var item in entityValue as IEnumerable)
                             {
-                                dBContext.Attach(item);
-                                dBContext.Entry(item).State = EntityState.Modified;
+                                if (item.GetType().IsClass)
+                                {
+                                    dBContext.Attach(item);
+                                    dBContext.Entry(item).State = EntityState.Modified;
+                                }
                             }
                         }
                         else
                         {
-                            dBContext.Attach(entityValue);
-                            dBContext.Entry(entityValue).State = EntityState.Modified;
+                            if (entityValue.GetType().IsClass)
+                            {
+                                dBContext.Attach(entityValue);
+                                dBContext.Entry(entityValue).State = EntityState.Modified;
+                            }
                         }
                     }
                 }
