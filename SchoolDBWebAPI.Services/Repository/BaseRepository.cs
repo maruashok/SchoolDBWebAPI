@@ -4,28 +4,31 @@ using Microsoft.EntityFrameworkCore.Storage;
 using SchoolDBWebAPI.Services.DBModels;
 using SchoolDBWebAPI.Services.SPHelper;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
+using SchoolDBWebAPI.Services.Extensions;
 
 namespace SchoolDBWebAPI.Services.Repository
 {
     public abstract class BaseRepository<TEntity> : ProcedureManager, IRepository<TEntity> where TEntity : class
     {
         private readonly DbSet<TEntity> dbSet;
-        private readonly SchoolDBContext context;
         private IDbContextTransaction transaction;
+        private readonly SchoolDBContext dBContext;
 
         public BaseRepository(SchoolDBContext context) : base(context)
         {
-            this.context = context;
+            this.dBContext = context;
             this.dbSet = context.Set<TEntity>();
         }
 
         public IQueryable<TEntity> GetQueryable()
         {
-            return dbSet;
+            return dbSet.AsNoTracking();
         }
 
         public virtual void DeleteById(object id)
@@ -51,7 +54,7 @@ namespace SchoolDBWebAPI.Services.Repository
 
         public virtual EntityEntry<TEntity> GetEntityEntry(TEntity entity)
         {
-            return context.Entry(entity);
+            return dBContext.Entry(entity);
         }
 
         public virtual async Task DeleteByIdAsync(object id)
@@ -62,7 +65,7 @@ namespace SchoolDBWebAPI.Services.Repository
 
         public virtual void Delete(TEntity entityToDelete)
         {
-            if (context.Entry(entityToDelete).State == EntityState.Detached)
+            if (dBContext.Entry(entityToDelete).State == EntityState.Detached)
             {
                 dbSet.Attach(entityToDelete);
             }
@@ -72,7 +75,40 @@ namespace SchoolDBWebAPI.Services.Repository
         public virtual void Update(TEntity entityToUpdate)
         {
             dbSet.Attach(entityToUpdate);
-            context.Entry(entityToUpdate).State = EntityState.Modified;
+            dBContext.Entry(entityToUpdate).State = EntityState.Modified;
+        }
+
+        public virtual void Update(TEntity entityToUpdate, string ChildEntities)
+        {
+            if (!string.IsNullOrEmpty(ChildEntities))
+            {
+                foreach (string updateProperty in ChildEntities.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    PropertyInfo property = typeof(TEntity).GetProperty(updateProperty);
+
+                    if (property != null && property.GetValue(entityToUpdate) != null)
+                    {
+                        object entityValue = property.GetValue(entityToUpdate);
+
+                        if (entityValue is IEnumerable)
+                        {
+                            foreach (var item in entityValue as IEnumerable)
+                            {
+                                dBContext.Attach(item);
+                                dBContext.Entry(item).State = EntityState.Modified;
+                            }
+                        }
+                        else
+                        {
+                            dBContext.Attach(entityValue);
+                            dBContext.Entry(entityValue).State = EntityState.Modified;
+                        }
+                    }
+                }
+            }
+
+            dbSet.Attach(entityToUpdate);
+            dBContext.Entry(entityToUpdate).State = EntityState.Modified;
         }
 
         public virtual async Task InsertAsync(TEntity entity)
@@ -97,7 +133,7 @@ namespace SchoolDBWebAPI.Services.Repository
 
         public virtual void DeleteRange(Expression<Func<TEntity, bool>> filter)
         {
-            IQueryable<TEntity> query = dbSet;
+            IQueryable<TEntity> query = GetQueryable();
 
             if (filter != null)
             {
@@ -111,7 +147,7 @@ namespace SchoolDBWebAPI.Services.Repository
 
         public virtual int GetCount(Expression<Func<TEntity, bool>> filter = null)
         {
-            IQueryable<TEntity> query = dbSet;
+            IQueryable<TEntity> query = GetQueryable();
 
             if (filter != null)
             {
@@ -123,7 +159,7 @@ namespace SchoolDBWebAPI.Services.Repository
 
         public virtual bool IsExists(Expression<Func<TEntity, bool>> filter = null)
         {
-            IQueryable<TEntity> query = dbSet;
+            IQueryable<TEntity> query = GetQueryable();
 
             if (filter != null)
             {
@@ -140,7 +176,7 @@ namespace SchoolDBWebAPI.Services.Repository
 
         public virtual async Task<int> GetCountAsync(Expression<Func<TEntity, bool>> filter = null)
         {
-            IQueryable<TEntity> query = dbSet;
+            IQueryable<TEntity> query = GetQueryable();
 
             if (filter != null)
             {
@@ -152,7 +188,7 @@ namespace SchoolDBWebAPI.Services.Repository
 
         public virtual async Task<bool> GetExistsAsync(Expression<Func<TEntity, bool>> filter = null)
         {
-            IQueryable<TEntity> query = dbSet;
+            IQueryable<TEntity> query = GetQueryable();
 
             if (filter != null)
             {
@@ -174,7 +210,10 @@ namespace SchoolDBWebAPI.Services.Repository
             includeProperties ??= string.Empty;
             foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                query = query.Include(includeProperty);
+                if (typeof(TEntity).GetProperty(includeProperty) != null)
+                {
+                    query = query.Include(includeProperty);
+                }
             }
 
             return query.FirstOrDefault();
@@ -182,7 +221,7 @@ namespace SchoolDBWebAPI.Services.Repository
 
         public virtual async Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>> filter = null, string includeProperties = null)
         {
-            IQueryable<TEntity> query = dbSet;
+            IQueryable<TEntity> query = GetQueryable();
 
             if (filter != null)
             {
@@ -192,7 +231,10 @@ namespace SchoolDBWebAPI.Services.Repository
             includeProperties ??= string.Empty;
             foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                query = query.Include(includeProperty);
+                if (typeof(TEntity).GetProperty(includeProperty) != null)
+                {
+                    query = query.Include(includeProperty);
+                }
             }
 
             return await query.FirstOrDefaultAsync();
@@ -200,7 +242,7 @@ namespace SchoolDBWebAPI.Services.Repository
 
         public virtual IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = null, int? skip = null, int? take = null)
         {
-            IQueryable<TEntity> query = dbSet;
+            IQueryable<TEntity> query = GetQueryable();
             includeProperties ??= string.Empty;
 
             if (filter != null)
@@ -210,7 +252,7 @@ namespace SchoolDBWebAPI.Services.Repository
 
             foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                if (typeof(TEntity).GetProperty(includeProperty) == null)
+                if (typeof(TEntity).GetProperty(includeProperty) != null)
                 {
                     query = query.Include(includeProperty);
                 }
@@ -236,17 +278,17 @@ namespace SchoolDBWebAPI.Services.Repository
 
         public void BeginTransaction()
         {
-            transaction = context.Database.BeginTransaction();
+            transaction = dBContext.Database.BeginTransaction();
         }
 
         public int SaveChanges()
         {
-            return context.SaveChanges();
+            return dBContext.SaveChanges();
         }
 
         public Task<int> SaveChangesAsync()
         {
-            return context.SaveChangesAsync();
+            return dBContext.SaveChangesAsync();
         }
 
         public void Commit()

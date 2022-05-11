@@ -39,10 +39,9 @@ namespace SchoolDBWebAPI.Services.Services
 
                 if (quizDetail != null)
                 {
-                    quizDetail.QuizQuestions.Clear();
                     Repository.SetEntityValues(quizDetail, model);
                     quizDetail.QuizQuestions = model.QuizQuestions;
-                    Repository.Update(quizDetail);
+                    Repository.Update(quizDetail, "QuizQuestions");
                     isUpdated = await Repository.SaveChangesAsync() > 0;
                 }
             }

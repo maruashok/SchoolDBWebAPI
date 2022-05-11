@@ -22,6 +22,8 @@ namespace SchoolDBWebAPI.Services.Repository
 
         void DeleteRange(Expression<Func<TEntity, bool>> filter);
 
+        void Update(TEntity entityToUpdate, string ChildEntities);
+
         IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = null, int? skip = null, int? take = null);
 
         TEntity GetByID(object id);
