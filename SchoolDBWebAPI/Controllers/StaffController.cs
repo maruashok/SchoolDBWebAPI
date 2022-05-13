@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SchoolDBWebAPI.Models;
 using SchoolDBWebAPI.Services.DBModels;
@@ -12,7 +13,7 @@ namespace SchoolDBWebAPI.Controllers
     [Route("api/[controller]")]
     public class StaffController : ControllerBase
     {
-        readonly IStaffService service;
+        private readonly IStaffService service;
         private readonly ILogger<StaffController> logger;
 
         public StaffController(IStaffService staffService, ILogger<StaffController> _logger)
@@ -21,6 +22,7 @@ namespace SchoolDBWebAPI.Controllers
             service = staffService;
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
@@ -46,7 +48,6 @@ namespace SchoolDBWebAPI.Controllers
 
             return Ok(response);
         }
-
 
         [HttpPost]
         [Route("update")]
@@ -75,6 +76,5 @@ namespace SchoolDBWebAPI.Controllers
 
             return Ok(response);
         }
-
     }
 }
