@@ -1,10 +1,11 @@
 ﻿using System.Text.Json;
 
-namespace SchoolDBWebAPI.Models
+namespace SchoolDBWebAPI.Services.Models
 {
-    public class ErrorDetails
+    public class RequestResponse
     {
-        public int StatusCode { get; set; }
+        public object Data { get; set; }
+        public bool Success { get; set; }
         public string Message { get; set; }
 
         public override string ToString()

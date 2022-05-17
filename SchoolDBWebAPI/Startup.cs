@@ -74,10 +74,11 @@ namespace SchoolDBWebAPI
                             .AddEntityFrameworkStores<UsersDbContext>();
 
             // configure strongly typed settings objects
-            var jwtSection = Configuration.GetSection("JwtBearerTokenSettings");
-            services.Configure<JwtBearerTokenSettings>(jwtSection);
+            var jwtSection = Configuration.GetSection(nameof(JwtBearerTokenSettings));
             var jwtBearerTokenSettings = jwtSection.Get<JwtBearerTokenSettings>();
             var key = Encoding.ASCII.GetBytes(jwtBearerTokenSettings.SecretKey);
+
+            services.Configure<JwtBearerTokenSettings>(jwtSection);
 
             services.AddAuthentication(options =>
             {

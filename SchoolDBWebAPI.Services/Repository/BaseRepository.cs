@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
 using SchoolDBWebAPI.Services.DBModels;
+using SchoolDBWebAPI.Services.Extensions;
 using SchoolDBWebAPI.Services.SPHelper;
 using System;
 using System.Collections;
@@ -10,7 +11,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
-using SchoolDBWebAPI.Services.Extensions;
 
 namespace SchoolDBWebAPI.Services.Repository
 {

@@ -1,15 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using SchoolDBWebAPI.Models;
 using SchoolDBWebAPI.Services.DBModels;
 using SchoolDBWebAPI.Services.Interfaces;
+using SchoolDBWebAPI.Services.Models;
 using SchoolDBWebAPI.Services.Models.SP.Query;
 using SchoolDBWebAPI.Services.Models.SP.Quiz;
-using SchoolDBWebAPI.Services.Services;
 using SchoolDBWebAPI.Services.SPHelper;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SchoolDBWebAPI.Controllers

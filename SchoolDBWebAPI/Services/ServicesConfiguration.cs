@@ -16,6 +16,7 @@ namespace SchoolDBWebAPI.Dependency
 
         public static void AddRepoServices(this IServiceCollection services)
         {
+            services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IStaffService, StaffService>();
             services.AddScoped<IQuizDetailService, QuizDetailService>();
             services.AddScoped<IQuizQuesRepository, QuizQuesRepository>();

@@ -16,7 +16,7 @@ namespace SchoolDBWebAPI.Services.Services
     public class StaffService : IStaffService
     {
         private readonly ILogger logger;
-        readonly IStaffRepository staffRepository;
+        private readonly IStaffRepository staffRepository;
 
         public StaffService(IStaffRepository _staffRepository)
         {
@@ -27,7 +27,6 @@ namespace SchoolDBWebAPI.Services.Services
         public staff GetStaff(int staffId)
         {
             return staffRepository.GetStaffById(staffId);
-
         }
 
         public async Task<bool> UpdateAsync(staff model)

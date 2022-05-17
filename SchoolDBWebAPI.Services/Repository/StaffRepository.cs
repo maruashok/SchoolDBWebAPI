@@ -9,8 +9,7 @@ namespace SchoolDBWebAPI.Services.Repository
 
     public class StaffRepository : BaseRepository<staff>, IStaffRepository
     {
-
-        public StaffRepository(SchoolDBContext dBContext):base(dBContext)
+        public StaffRepository(SchoolDBContext dBContext) : base(dBContext)
         {
         }
 

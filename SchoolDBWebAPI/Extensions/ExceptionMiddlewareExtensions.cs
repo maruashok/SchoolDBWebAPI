@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using SchoolDBWebAPI.Models;
+using SchoolDBWebAPI.Services.Models;
 using System.Net;
 
 namespace SchoolDBWebAPI.Extensions
@@ -21,9 +21,9 @@ namespace SchoolDBWebAPI.Extensions
                     if (contextFeature != null)
                     {
                         logger.LogError($"Something went wrong: {contextFeature.Error}");
-                        await context.Response.WriteAsync(new ErrorDetails()
+                        await context.Response.WriteAsync(new RequestResponse()
                         {
-                            StatusCode = context.Response.StatusCode,
+                            Success = false,
                             Message = "Internal Server Error."
                         }.ToString());
                     }
