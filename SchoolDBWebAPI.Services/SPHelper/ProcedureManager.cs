@@ -98,22 +98,7 @@ namespace SchoolDBWebAPI.Services.SPHelper
                 {
                     using (SqlCommand sqlCommand = new SqlCommand(StoreProcedure, connection))
                     {
-                        if (SQLParameters != null)
-                        {
-                            sqlCommand.CommandType = CommandType.StoredProcedure;
-
-                            foreach (DBSQLParameter curParam in SQLParameters)
-                            {
-                                if (curParam.Name.StartsWith('@'))
-                                {
-                                    sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
-                                }
-                                else
-                                {
-                                    sqlCommand.Parameters.AddWithValue($"@{curParam.Name}", curParam.Value ?? DBNull.Value);
-                                }
-                            }
-                        }
+                        sqlCommand.AddParams(GenerateParams(StoreProcedureModel));
 
                         if (OpenConnection(connection))
                         {
@@ -131,79 +116,6 @@ namespace SchoolDBWebAPI.Services.SPHelper
             return Result;
         }
 
-        public DataTable ExecuteSelect(string Command, params SqlParameter[] SQLParameters)
-        {
-            DataTable dataTable = new DataTable();
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(dbContext.Database.GetConnectionString()))
-                {
-                    using (SqlCommand sqlCommand = new SqlCommand(Command, connection))
-                    {
-                        if (SQLParameters != null)
-                        {
-                            foreach (object curParam in SQLParameters)
-                            {
-                                sqlCommand.Parameters.Add(curParam);
-                            }
-                        }
-
-                        using (var dataAdapter = new SqlDataAdapter(sqlCommand))
-                        {
-                            dataAdapter.Fill(dataTable);
-                        }
-                    }
-                }
-            }
-            catch (Exception Ex)
-            {
-                logger.Error(Ex, Ex.Message);
-            }
-
-            return dataTable;
-        }
-
-        public List<T> ExecuteSelect<T>(string Command, params SqlParameter[] SQLParameters) where T : new()
-        {
-            List<T> objResult = default;
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(dbContext.Database.GetConnectionString()))
-                {
-                    using (SqlCommand sqlCommand = new SqlCommand(Command, connection))
-                    {
-                        sqlCommand.CommandType = CommandType.Text;
-
-                        if (SQLParameters != null)
-                        {
-                            foreach (SqlParameter curParam in SQLParameters)
-                            {
-                                sqlCommand.Parameters.Add(curParam);
-                            }
-                        }
-
-                        if (OpenConnection(connection))
-                        {
-                            using (SqlDataReader sqlDataReader = sqlCommand.ExecuteReader())
-                            {
-                                objResult = sqlDataReader.MapToList<T>();
-                            }
-
-                            CloseConnection(connection);
-                        }
-                    }
-                }
-            }
-            catch (Exception Ex)
-            {
-                logger.Error(Ex, Ex.Message);
-            }
-
-            return objResult;
-        }
-
         public List<T> ExecStoreProcedure<T>(string StoreProcedure, object StoreProcedureModel)
         {
             List<T> objResult = default;
@@ -216,22 +128,7 @@ namespace SchoolDBWebAPI.Services.SPHelper
                 {
                     using (SqlCommand sqlCommand = new SqlCommand(StoreProcedure, connection))
                     {
-                        if (SQLParameters != null)
-                        {
-                            sqlCommand.CommandType = CommandType.StoredProcedure;
-
-                            foreach (DBSQLParameter curParam in SQLParameters)
-                            {
-                                if (curParam.Name.StartsWith('@'))
-                                {
-                                    sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
-                                }
-                                else
-                                {
-                                    sqlCommand.Parameters.AddWithValue($"@{curParam.Name}", curParam.Value ?? DBNull.Value);
-                                }
-                            }
-                        }
+                        sqlCommand.AddParams(GenerateParams(StoreProcedureModel));
 
                         using (var dataAdapter = new SqlDataAdapter(sqlCommand))
                         {
@@ -263,22 +160,7 @@ namespace SchoolDBWebAPI.Services.SPHelper
                 {
                     using (SqlCommand sqlCommand = new SqlCommand(StoreProcedure, connection))
                     {
-                        if (SQLParameters != null)
-                        {
-                            sqlCommand.CommandType = CommandType.StoredProcedure;
-
-                            foreach (DBSQLParameter curParam in SQLParameters)
-                            {
-                                if (curParam.Name.StartsWith('@'))
-                                {
-                                    sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
-                                }
-                                else
-                                {
-                                    sqlCommand.Parameters.AddWithValue($"@{curParam.Name}", curParam.Value ?? DBNull.Value);
-                                }
-                            }
-                        }
+                        sqlCommand.AddParams(SQLParameters);
 
                         if (OpenConnection(connection))
                         {
@@ -308,22 +190,7 @@ namespace SchoolDBWebAPI.Services.SPHelper
                 {
                     using (SqlCommand sqlCommand = new SqlCommand(StoreProcedure, connection))
                     {
-                        if (SQLParameters != null)
-                        {
-                            sqlCommand.CommandType = CommandType.StoredProcedure;
-
-                            foreach (DBSQLParameter curParam in SQLParameters)
-                            {
-                                if (curParam.Name.StartsWith('@'))
-                                {
-                                    sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
-                                }
-                                else
-                                {
-                                    sqlCommand.Parameters.AddWithValue($"@{curParam.Name}", curParam.Value ?? DBNull.Value);
-                                }
-                            }
-                        }
+                        sqlCommand.AddParams(SQLParameters);
 
                         using (var dataAdapter = new SqlDataAdapter(sqlCommand))
                         {
@@ -345,49 +212,6 @@ namespace SchoolDBWebAPI.Services.SPHelper
             return objResult;
         }
 
-        public DataTable ExecStoreProcedureDT(string StoreProcedure, List<DBSQLParameter> SQLParameters)
-        {
-            DataTable dataTable = new DataTable();
-
-            try
-            {
-                Log.Information(StoreProcedure);
-                using (SqlConnection connection = new SqlConnection(dbContext.Database.GetConnectionString()))
-                {
-                    using (SqlCommand sqlCommand = new SqlCommand(StoreProcedure, connection))
-                    {
-                        if (SQLParameters != null)
-                        {
-                            sqlCommand.CommandType = CommandType.StoredProcedure;
-
-                            foreach (DBSQLParameter curParam in SQLParameters)
-                            {
-                                if (curParam.Name.StartsWith('@'))
-                                {
-                                    sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
-                                }
-                                else
-                                {
-                                    sqlCommand.Parameters.AddWithValue($"@{curParam.Name}", curParam.Value ?? DBNull.Value);
-                                }
-                            }
-                        }
-
-                        using (var dataAdapter = new SqlDataAdapter(sqlCommand))
-                        {
-                            dataAdapter.Fill(dataTable);
-                        }
-                    }
-                }
-            }
-            catch (Exception Ex)
-            {
-                logger.Error(Ex, Ex.Message);
-            }
-
-            return dataTable;
-        }
-
         public List<DBSQLParameter> ExecStoreProcedureOut(string StoreProcedure, List<DBSQLParameter> SQLParameters)
         {
             List<DBSQLParameter> OutSQLParameters = default;
@@ -398,22 +222,7 @@ namespace SchoolDBWebAPI.Services.SPHelper
                 {
                     using (SqlCommand sqlCommand = new SqlCommand(StoreProcedure, connection))
                     {
-                        if (SQLParameters != null)
-                        {
-                            sqlCommand.CommandType = CommandType.StoredProcedure;
-                            foreach (DBSQLParameter curParam in SQLParameters)
-                            {
-                                if (curParam.Name.StartsWith('@'))
-                                {
-                                    sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
-                                }
-                                else
-                                {
-                                    sqlCommand.Parameters.AddWithValue($"@{curParam.Name}", curParam.Value ?? DBNull.Value);
-                                }
-                            }
-                        }
-
+                        sqlCommand.AddParams(SQLParameters);
                         sqlCommand.ExecuteNonQuery();
 
                         if (SQLParameters != null)
@@ -432,6 +241,40 @@ namespace SchoolDBWebAPI.Services.SPHelper
             }
 
             return OutSQLParameters;
+        }
+
+        public Tuple<List<TFirst>, List<TSecond>> ExecStoreProcedureMulResults<TFirst, TSecond>(string StoreProcedure, List<DBSQLParameter> SQLParameters)
+        {
+            List<TFirst> firstResult = new();
+            List<TSecond> secondResult = new();
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(dbContext.Database.GetConnectionString()))
+                {
+                    if (OpenConnection(connection))
+                    {
+                        using (SqlCommand sqlCommand = new SqlCommand(StoreProcedure, connection))
+                        {
+                            sqlCommand.AddParams(SQLParameters);
+
+                            using (var reader = sqlCommand.ExecuteReader())
+                            {
+                                firstResult = reader.MapToList<TFirst>();
+                                reader.NextResult();
+                                secondResult = reader.MapToList<TSecond>();
+                                reader.Close();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception Ex)
+            {
+                logger.Error(Ex, Ex.Message);
+            }
+
+            return new Tuple<List<TFirst>, List<TSecond>>(firstResult, secondResult);
         }
 
         protected virtual void Dispose(bool disposing)

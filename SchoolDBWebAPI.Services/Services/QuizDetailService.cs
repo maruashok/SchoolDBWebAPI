@@ -1,6 +1,8 @@
 ﻿using SchoolDBWebAPI.Services.DBModels;
+using SchoolDBWebAPI.Services.Extensions;
 using SchoolDBWebAPI.Services.Interfaces;
 using SchoolDBWebAPI.Services.Models.SP.Query;
+using SchoolDBWebAPI.Services.Models.SP.Result;
 using SchoolDBWebAPI.Services.Repository;
 using SchoolDBWebAPI.Services.SPHelper;
 using Serilog;
@@ -65,7 +67,7 @@ namespace SchoolDBWebAPI.Services.Services
 
         public List<QuizDetail> SearchQuizByTitle(string QuizTitle)
         {
-            return Repository.ExecuteSelect<QuizDetail>($@"Select * from QuizDetail where Title like '%' + @Qry +'%'", new SqlParameter("@Qry", QuizTitle));
+            return Repository.GetWithRawSql($@"Select * from QuizDetail where Title like '%' + @Qry +'%'", QuizTitle).ToList();
         }
 
         public QuizDetail SearchQuiz(string QuizTitle)
@@ -80,6 +82,25 @@ namespace SchoolDBWebAPI.Services.Services
             try
             {
                 quizDetail = await Repository.GetFirstAsync(quiz => quiz.Id == QuizId, includeProperties: "QuizQuestions");
+            }
+            catch (Exception Ex)
+            {
+                logger.Error(Ex, Ex.Message);
+            }
+
+            return quizDetail;
+        }
+
+        public QuizDetail QuizWithQues(int QuizId)
+        {
+            QuizDetail quizDetail = default;
+
+            try
+            {
+                var paramList = new List<DBSQLParameter>();
+                paramList.Add(new DBSQLParameter("@QuizId", QuizId));
+                var result = Repository.ExecStoreProcedureMulResults<QuizDetail, QuizQuestion>("SP_QuizWithQues", paramList);
+                quizDetail = (result.Item1.Map(result.Item2, quiz => quiz.Id, quizQues => quizQues.QuizId, (quiz, ques) => { quiz.QuizQuestions = ques.ToList(); }) as List<QuizDetail>).FirstOrDefault();
             }
             catch (Exception Ex)
             {

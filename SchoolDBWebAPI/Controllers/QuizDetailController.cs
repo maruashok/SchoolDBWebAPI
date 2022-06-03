@@ -78,6 +78,32 @@ namespace SchoolDBWebAPI.Controllers
             return Ok(response);
         }
 
+        [HttpGet("quiz/{id}/ques")]
+        public IActionResult GetWithQues(int id)
+        {
+            RequestResponse response = new();
+
+            try
+            {
+                var quizDetail = service.QuizWithQues(id);
+
+                if (quizDetail != null)
+                {
+                    response.Success = true;
+                    response.Data = quizDetail;
+                    logger.LogInformation("Details loaded");
+                }
+            }
+            catch (Exception Ex)
+            {
+                response.Success = false;
+                response.Message = Ex.Message;
+                logger.LogError(Ex, Ex.Message);
+            }
+
+            return Ok(response);
+        }
+
         [HttpGet("search/{qry}")]
         public IActionResult GetByName(string qry)
         {

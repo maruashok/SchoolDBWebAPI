@@ -1,8 +1,10 @@
-﻿using Serilog;
+﻿using SchoolDBWebAPI.Services.SPHelper;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 using ILogger = Serilog.ILogger;
@@ -17,15 +19,15 @@ namespace SchoolDBWebAPI.Services.Extensions
         {
             Type temp = typeof(T);
             T obj = Activator.CreateInstance<T>();
+            PropertyInfo[] properties = temp.GetProperties(BindingFlags.Instance | BindingFlags.Public);
 
             foreach (DataColumn column in dr.Table.Columns)
             {
-                foreach (PropertyInfo pro in temp.GetProperties())
+                PropertyInfo propertyInfo = properties.Where(prop => prop.Name.ToLower() == column.ColumnName.ToLower()).FirstOrDefault();
+
+                if (propertyInfo != null && dr[column.ColumnName] != DBNull.Value)
                 {
-                    if (pro.Name == column.ColumnName)
-                        pro.SetValue(obj, dr[column.ColumnName], null);
-                    else
-                        continue;
+                    propertyInfo.SetValue(obj, dr[column.ColumnName], null);
                 }
             }
             return obj;
@@ -53,10 +55,10 @@ namespace SchoolDBWebAPI.Services.Extensions
             return data;
         }
 
-        public static T MapToSingle<T>(this DbDataReader dr) where T : new()
+        public static T MapToSingle<T>(this SqlDataReader dr)
         {
-            T RetVal = new();
             Type Entity = typeof(T);
+            T RetVal = Activator.CreateInstance<T>();
             Dictionary<string, PropertyInfo> PropDict = new Dictionary<string, PropertyInfo>();
 
             try
@@ -88,7 +90,7 @@ namespace SchoolDBWebAPI.Services.Extensions
             return RetVal;
         }
 
-        public static List<T> MapToList<T>(this DbDataReader dr) where T : new()
+        public static List<T> MapToList<T>(this SqlDataReader dr)
         {
             List<T> RetVal = null;
             Type Entity = typeof(T);
@@ -104,7 +106,7 @@ namespace SchoolDBWebAPI.Services.Extensions
 
                     while (dr.Read())
                     {
-                        T newObject = new T();
+                        T newObject = Activator.CreateInstance<T>();
                         for (int Index = 0; Index < dr.FieldCount; Index++)
                         {
                             if (PropDict.ContainsKey(dr.GetName(Index).ToUpper()))
@@ -128,25 +130,50 @@ namespace SchoolDBWebAPI.Services.Extensions
             return RetVal;
         }
 
-        public static T GetDataTableColumnValue<T>(this DataRow row, string columnname)
+        public static IEnumerable<TFirst> Map<TFirst, TSecond, TKey>
+        (
+            this List<TFirst> parent,
+            List<TSecond> child,
+            Func<TFirst, TKey> firstKey,
+            Func<TSecond, TKey> secondKey,
+            Action<TFirst, IEnumerable<TSecond>> addChildren
+        )
         {
-            try
+            var childMap = child
+                .GroupBy(secondKey)
+                .ToDictionary(g => g.Key, g => g.AsEnumerable());
+
+            foreach (var item in parent)
             {
-                object _objColumn = row[columnname];
-                return _objColumn.ChangeType<T>();
-            }
-            catch (Exception)
-            {
-                try
+                if (childMap.TryGetValue(firstKey(item), out IEnumerable<TSecond> children))
                 {
-                    var _objColumn = row.Field<object>(columnname);
-                    return ChangeType<T>(_objColumn);
-                }
-                catch (Exception)
-                {
-                    return default(T);
+                    addChildren(item, children);
                 }
             }
+
+            return parent;
+        }
+
+        public static SqlCommand AddParams(this SqlCommand sqlCommand, List<DBSQLParameter> SQLParameters)
+        {
+            if (SQLParameters != null)
+            {
+                sqlCommand.CommandType = CommandType.StoredProcedure;
+
+                foreach (DBSQLParameter curParam in SQLParameters)
+                {
+                    if (curParam.Name.StartsWith('@'))
+                    {
+                        sqlCommand.Parameters.AddWithValue(curParam.Name, curParam.Value ?? DBNull.Value);
+                    }
+                    else
+                    {
+                        sqlCommand.Parameters.AddWithValue($"@{curParam.Name}", curParam.Value ?? DBNull.Value);
+                    }
+                }
+            }
+
+            return sqlCommand;
         }
     }
 }

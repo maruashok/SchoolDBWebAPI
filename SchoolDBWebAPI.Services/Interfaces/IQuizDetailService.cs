@@ -24,6 +24,8 @@ namespace SchoolDBWebAPI.Services.Interfaces
 
         QuizDetail Insert(QuizDetail quizDetail);
 
+        public QuizDetail QuizWithQues(int QuizId);
+
         Task<bool> UpdateAsync(QuizDetail quizDetail);
 
         Task<QuizDetail> QuizWithQuesAsync(int QuizId);

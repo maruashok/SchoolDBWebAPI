@@ -1,4 +1,5 @@
 ﻿using SchoolDBWebAPI.Services.SPHelper;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -17,13 +18,9 @@ namespace SchoolDBWebAPI.Services.Interfaces
 
         List<T> ExecStoreProcedure<T>(string StoreProcedure, object StoreProcedureModel);
 
-        DataTable ExecStoreProcedureDT(string StoreProcedure, List<DBSQLParameter> SQLParameters);
+        Tuple<List<TFirst>, List<TSecond>> ExecStoreProcedureMulResults<TFirst, TSecond>(string StoreProcedure, List<DBSQLParameter> SQLParameters);
 
         List<DBSQLParameter> ExecStoreProcedureOut(string StoreProcedure, List<DBSQLParameter> SQLParameters);
-
-        DataTable ExecuteSelect(string Command, params SqlParameter[] SQLParameters);
-
-        List<T> ExecuteSelect<T>(string Command, params SqlParameter[] SQLParameters) where T : new();
 
         List<DBSQLParameter> GenerateParams(object objModel, bool AddNull = false);
     }

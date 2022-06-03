@@ -111,10 +111,11 @@ namespace SchoolDBWebAPI
         {
             if (env.IsDevelopment())
             {
-                app.UseSwagger();
                 app.UseDeveloperExceptionPage();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SchoolDBWebAPI v1"));
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SchoolDBWebAPI v1"));
 
             app.ConfigureExceptionHandler(logger);
 
