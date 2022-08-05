@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using SchoolDBWebAPI.DAL.UserIdentity;
 using SchoolDBWebAPI.Services.Interfaces;
 using SchoolDBWebAPI.Services.Models;
 using SchoolDBWebAPI.Services.UsersDBModels;
@@ -38,7 +39,7 @@ namespace SchoolDBWebAPI.Services.Services
 
         public async Task<RequestResponse> Logout(string username)
         {
-            RequestResponse response = new RequestResponse();
+            RequestResponse response = new();
 
             var user = await userManager.FindByNameAsync(username);
 
@@ -76,7 +77,7 @@ namespace SchoolDBWebAPI.Services.Services
 
         public async Task<RequestResponse> RefreshToken(TokenModel tokenModel)
         {
-            RequestResponse response = new RequestResponse();
+            RequestResponse response = new();
 
             string? accessToken = tokenModel.AccessToken;
             string? refreshToken = tokenModel.RefreshToken;
@@ -117,7 +118,7 @@ namespace SchoolDBWebAPI.Services.Services
 
         public async Task<RequestResponse> RegisterUserAsync(UserDetails userDetails)
         {
-            RequestResponse response = new RequestResponse();
+            RequestResponse response = new();
 
             var userExists = await userManager.FindByNameAsync(userDetails.Username);
 
@@ -167,7 +168,7 @@ namespace SchoolDBWebAPI.Services.Services
 
         public async Task<RequestResponse> LoginUserAsync(LoginCredentials credentials)
         {
-            RequestResponse response = new RequestResponse();
+            RequestResponse response = new();
 
             ApplicationUser identityUser = await ValidateUser(credentials);
 

@@ -1,6 +1,6 @@
-﻿using SchoolDBWebAPI.Services.DBModels;
-using SchoolDBWebAPI.Services.Models.SP.Query;
-using SchoolDBWebAPI.Services.SPHelper;
+﻿using SchoolDBWebAPI.DAL.DBModels;
+using SchoolDBWebAPI.DAL.Models.SP.Query;
+using SchoolDBWebAPI.DAL.SPHelper;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;

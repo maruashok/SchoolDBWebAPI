@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SchoolDBWebAPI.DAL.UserIdentity;
 using SchoolDBWebAPI.Services.Interfaces;
 using SchoolDBWebAPI.Services.Models;
 using SchoolDBWebAPI.Services.UsersDBModels;

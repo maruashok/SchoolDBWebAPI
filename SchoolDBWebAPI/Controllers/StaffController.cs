@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using SchoolDBWebAPI.Services.DBModels;
+using SchoolDBWebAPI.DAL.DBModels;
 using SchoolDBWebAPI.Services.Models;
 using SchoolDBWebAPI.Services.Services;
 using System;

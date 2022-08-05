@@ -1,6 +1,6 @@
-﻿using SchoolDBWebAPI.Services.DBModels;
+﻿using SchoolDBWebAPI.DAL.DBModels;
+using SchoolDBWebAPI.DAL.Repository;
 using SchoolDBWebAPI.Services.Interfaces;
-using SchoolDBWebAPI.Services.Repository;
 using Serilog;
 using System;
 

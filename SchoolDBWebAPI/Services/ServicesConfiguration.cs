@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using SchoolDBWebAPI.DAL.Repository;
 using SchoolDBWebAPI.Services.Interfaces;
-using SchoolDBWebAPI.Services.Repository;
 using SchoolDBWebAPI.Services.Services;
 
 namespace SchoolDBWebAPI.Dependency

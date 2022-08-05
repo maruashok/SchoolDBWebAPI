@@ -1,5 +1,5 @@
-﻿using SchoolDBWebAPI.Services.DBModels;
-using SchoolDBWebAPI.Services.Repository;
+﻿using SchoolDBWebAPI.DAL.DBModels;
+using SchoolDBWebAPI.DAL.Repository;
 using Serilog;
 using System;
 using System.Threading.Tasks;

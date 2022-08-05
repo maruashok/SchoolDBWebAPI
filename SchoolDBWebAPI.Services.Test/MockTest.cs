@@ -1,8 +1,8 @@
 ﻿using MockQueryable.Moq;
 using Moq;
-using SchoolDBWebAPI.Services.DBModels;
+using SchoolDBWebAPI.DAL.DBModels;
+using SchoolDBWebAPI.DAL.Repository;
 using SchoolDBWebAPI.Services.Interfaces;
-using SchoolDBWebAPI.Services.Repository;
 using SchoolDBWebAPI.Services.Services;
 using System;
 using System.Collections.Generic;

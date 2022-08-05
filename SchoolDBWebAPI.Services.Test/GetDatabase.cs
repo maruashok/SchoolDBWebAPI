@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using SchoolDBWebAPI.Services.DBModels;
+using SchoolDBWebAPI.DAL.DBModels;
 using System;
 using System.IO;
 

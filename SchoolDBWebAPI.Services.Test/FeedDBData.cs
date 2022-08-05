@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using SchoolDBWebAPI.Services.DBModels;
+using SchoolDBWebAPI.DAL.DBModels;
 using System.Collections.Generic;
 using System.IO;
 
