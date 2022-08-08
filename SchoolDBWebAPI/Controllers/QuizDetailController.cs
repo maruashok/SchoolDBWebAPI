@@ -2,11 +2,8 @@
 using Microsoft.Extensions.Logging;
 using SchoolDBWebAPI.DAL.DBModels;
 using SchoolDBWebAPI.DAL.Models.SP.Query;
-using SchoolDBWebAPI.DAL.Models.SP.Quiz;
-using SchoolDBWebAPI.DAL.SPHelper;
 using SchoolDBWebAPI.Services.Interfaces;
 using SchoolDBWebAPI.Services.Models;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -17,250 +14,118 @@ namespace SchoolDBWebAPI.Controllers
     public class QuizDetailController : ControllerBase
     {
         private readonly IQuizDetailService service;
-        private readonly ILogger<QuizDetailController> logger;
 
-        public QuizDetailController(IQuizDetailService _quizDetailService, ILogger<QuizDetailController> _logger)
+        public QuizDetailController(IQuizDetailService _quizDetailService)
         {
-            logger = _logger;
             service = _quizDetailService;
         }
 
-        // GET api/<QuizDetail>/5
-        [HttpGet("{id}")]
+        [HttpGet]
         public IActionResult Get(int id)
         {
             RequestResponse response = new();
 
-            try
-            {
-                QuizDetail quizDetail = service.GetByID(id);
+            QuizDetail quizDetail = service.GetByID(id);
 
-                if (quizDetail != null)
-                {
-                    response.Success = true;
-                    response.Data = quizDetail;
-                    logger.LogInformation("Details loaded");
-                }
-            }
-            catch (Exception Ex)
+            if (quizDetail != null)
             {
-                response.Success = false;
-                response.Message = Ex.Message;
-                logger.LogError(Ex, Ex.Message);
+                response.Success = true;
+                response.Data = quizDetail;
             }
 
             return Ok(response);
         }
 
-        [HttpGet("quiz/{id}")]
+        [HttpGet("{id}/quesAsync")]
         public async Task<IActionResult> GetWithQuesAsync(int id)
         {
             RequestResponse response = new();
 
-            try
-            {
-                QuizDetail quizDetail = await service.QuizWithQuesAsync(id);
+            QuizDetail quizDetail = await service.QuizWithQuesAsync(id);
 
-                if (quizDetail != null)
-                {
-                    response.Success = true;
-                    response.Data = quizDetail;
-                    logger.LogInformation("Details loaded");
-                }
-            }
-            catch (Exception Ex)
+            if (quizDetail != null)
             {
-                response.Success = false;
-                response.Message = Ex.Message;
-                logger.LogError(Ex, Ex.Message);
+                response.Success = true;
+                response.Data = quizDetail;
             }
 
             return Ok(response);
         }
 
-        [HttpGet("quiz/{id}/ques")]
+        [HttpGet("{id}/ques")]
         public IActionResult GetWithQues(int id)
         {
             RequestResponse response = new();
 
-            try
-            {
-                var quizDetail = service.QuizWithQues(id);
+            var quizDetail = service.QuizWithQues(id);
 
-                if (quizDetail != null)
-                {
-                    response.Success = true;
-                    response.Data = quizDetail;
-                    logger.LogInformation("Details loaded");
-                }
-            }
-            catch (Exception Ex)
+            if (quizDetail != null)
             {
-                response.Success = false;
-                response.Message = Ex.Message;
-                logger.LogError(Ex, Ex.Message);
+                response.Success = true;
+                response.Data = quizDetail;
             }
 
             return Ok(response);
         }
 
-        [HttpGet("search/{qry}")]
+        [HttpGet("searchTitle")]
         public IActionResult GetByName(string qry)
         {
             RequestResponse response = new();
 
-            try
-            {
-                List<QuizDetail> quizDetail = service.SearchQuizByTitle(qry);
+            List<QuizDetail> quizDetail = service.SearchQuizByTitle(qry);
 
-                if (quizDetail != null)
-                {
-                    response.Success = true;
-                    response.Data = quizDetail;
-                }
-            }
-            catch (Exception Ex)
+            if (quizDetail != null)
             {
-                response.Success = false;
-                response.Message = Ex.Message;
-                logger.LogError(Ex, Ex.Message);
+                response.Success = true;
+                response.Data = quizDetail;
             }
 
             return Ok(response);
         }
 
-        // DELETE api/<QuizDetail>/5
-        [HttpDelete("delete/{id}")]
+        [HttpDelete]
         public IActionResult Delete(int id)
         {
             RequestResponse response = new();
 
-            try
-            {
-                response.Success = service.DeleteByID(id);
-            }
-            catch (Exception Ex)
-            {
-                response.Success = false;
-                response.Message = Ex.Message;
-                logger.LogError(Ex, Ex.Message);
-            }
+            response.Success = service.DeleteByID(id);
 
             return Ok(response);
         }
 
-        [HttpGet]
-        [Route("deleteall")]
-        public IActionResult DeleteAll()
-        {
-            RequestResponse response = new();
-
-            try
-            {
-                response.Success = service.DeleteRange(data => data.Title.Contains("string")) > 0;
-            }
-            catch (Exception Ex)
-            {
-                response.Success = false;
-                response.Message = Ex.Message;
-                logger.LogError(Ex, Ex.Message);
-            }
-
-            return Ok(response);
-        }
-
-        [HttpPost]
-        [Route("add")]
-        public IActionResult Add(SP_QuizDetailInsert model)
-        {
-            RequestResponse response = new();
-
-            try
-            {
-                List<DBSQLParameter> paramList = new()
-                {
-                    new DBSQLParameter("@Title", model.Title),
-                    new DBSQLParameter("@EndDate", model.EndDate),
-                    new DBSQLParameter("@PaidQuiz", model.PaidQuiz),
-                    new DBSQLParameter("@StartDate", model.StartDate),
-                    new DBSQLParameter("@CreatorId", model.CreatorId),
-                    new DBSQLParameter("@Description", model.Description)
-                };
-
-                QuizDetail quizDetail = service.AddQuiz(paramList);
-
-                if (quizDetail != null)
-                {
-                    response.Success = true;
-                    response.Data = quizDetail;
-                    response.Message = "Quiz Added Successfully";
-                }
-                else
-                {
-                    response.Message = "Failed to Add Quiz Details";
-                }
-            }
-            catch (Exception Ex)
-            {
-                response.Success = false;
-                response.Message = Ex.Message;
-                logger.LogError(Ex, Ex.Message);
-            }
-
-            return Ok(response);
-        }
-
-        [HttpPost]
-        [Route("insert")]
+        [HttpPut]
         public IActionResult Insert(QuizDetail model)
         {
             RequestResponse response = new();
 
-            try
+            if (service.Insert(model))
             {
-                if (service.Insert(model).Id > 0)
-                {
-                    response.Success = true;
-                    response.Message = "Quiz Added Successfully";
-                }
-                else
-                {
-                    response.Message = "Failed to Add Quiz Details";
-                }
+                response.Success = true;
+                response.Message = "Quiz Added Successfully";
             }
-            catch (Exception Ex)
+            else
             {
-                response.Success = false;
-                response.Message = Ex.Message;
-                logger.LogError(Ex, Ex.Message);
+                response.Message = "Failed to Add Quiz Details";
             }
 
             return Ok(response);
         }
 
         [HttpPost]
-        [Route("update")]
+        [Route("updateAsync")]
         public async Task<IActionResult> UpdateAsync(QuizDetail model)
         {
             RequestResponse response = new();
 
-            try
+            if (await service.UpdateAsync(model))
             {
-                if (await service.UpdateAsync(model))
-                {
-                    response.Success = true;
-                    response.Message = "Quiz Updated Successfully";
-                }
-                else
-                {
-                    response.Message = "Failed to Updated Quiz Details";
-                }
+                response.Success = true;
+                response.Message = "Quiz Updated Successfully";
             }
-            catch (Exception Ex)
+            else
             {
-                response.Success = false;
-                response.Message = Ex.Message;
-                logger.LogError(Ex, Ex.Message);
+                response.Message = "Failed to Updated Quiz Details";
             }
 
             return Ok(response);
@@ -272,26 +137,17 @@ namespace SchoolDBWebAPI.Controllers
         {
             RequestResponse response = new();
 
-            try
-            {
-                List<QuizDetail> QuizDetail = service.ListAllQuiz(model);
+            List<QuizDetail> QuizDetail = service.ListAllQuiz(model);
 
-                if (QuizDetail != null)
-                {
-                    response.Success = true;
-                    response.Data = QuizDetail;
-                    response.Message = "Details Successfully";
-                }
-                else
-                {
-                    response.Message = "Failed to Get Details";
-                }
-            }
-            catch (Exception Ex)
+            if (QuizDetail != null)
             {
-                response.Success = false;
-                response.Message = Ex.Message;
-                logger.LogError(Ex, Ex.Message);
+                response.Success = true;
+                response.Data = QuizDetail;
+                response.Message = "Details Successfully";
+            }
+            else
+            {
+                response.Message = "Failed to Get Details";
             }
 
             return Ok(response);

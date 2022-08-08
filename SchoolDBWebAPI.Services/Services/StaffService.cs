@@ -1,7 +1,5 @@
 ﻿using SchoolDBWebAPI.DAL.DBModels;
 using SchoolDBWebAPI.DAL.Repository;
-using Serilog;
-using System;
 using System.Threading.Tasks;
 
 namespace SchoolDBWebAPI.Services.Services
@@ -15,13 +13,11 @@ namespace SchoolDBWebAPI.Services.Services
 
     public class StaffService : IStaffService
     {
-        private readonly ILogger logger;
         private readonly IStaffRepository staffRepository;
 
         public StaffService(IStaffRepository _staffRepository)
         {
             staffRepository = _staffRepository;
-            logger = Log.ForContext<StaffService>();
         }
 
         public staff GetStaff(int staffId)
@@ -33,22 +29,14 @@ namespace SchoolDBWebAPI.Services.Services
         {
             bool isUpdated = default;
 
-            try
-            {
-                staff staffDetail = await staffRepository.GetFirstAsync(quiz => quiz.Id == model.Id, includeProperties: "Address");
+            staff staff = await staffRepository.GetFirstAsync(quiz => quiz.Id == model.Id, quiz => quiz.Address);
 
-                if (staffDetail != null)
-                {
-                    staffRepository.SetEntityValues(staffDetail, model);
-                    staffDetail.Address = model.Address;
-                    //staffRepository.Update(staffDetail);
-                    staffRepository.Update(staffDetail, "Address");
-                    isUpdated = await staffRepository.SaveChangesAsync() > 0;
-                }
-            }
-            catch (Exception Ex)
+            if (staff != null)
             {
-                logger.Error(Ex, Ex.Message);
+                staffRepository.SetEntityValues(staff, model);
+                staff.Address = model.Address;
+                staffRepository.Update(staff, quiz => quiz.Address);
+                isUpdated = await staffRepository.SaveChangesAsync() > 0;
             }
 
             return isUpdated;

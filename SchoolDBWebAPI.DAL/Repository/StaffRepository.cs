@@ -1,9 +1,8 @@
 ﻿using SchoolDBWebAPI.DAL.DBModels;
-using SchoolDBWebAPI.DAL.Interfaces;
 
 namespace SchoolDBWebAPI.DAL.Repository
 {
-    public interface IStaffRepository : IRepository<staff>
+    public interface IStaffRepository : IBaseRepository<staff>
     {
         public staff GetStaffById(int id);
     }
@@ -16,7 +15,7 @@ namespace SchoolDBWebAPI.DAL.Repository
 
         public staff GetStaffById(int id)
         {
-            return GetFirst(staff => staff.Id == id, includeProperties: "Address");
+            return GetFirst(staff => staff.Id == id, staff => staff.Address);
         }
     }
 }

@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using SchoolDBWebAPI.DAL.Interfaces;
 using System.Linq.Expressions;
 
-namespace SchoolDBWebAPI.DAL.Interfaces
+namespace SchoolDBWebAPI.DAL.Repository
 {
-    public interface IRepository<TEntity> : IProcedureManager where TEntity : class
+    public interface IBaseRepository<TEntity> : IProcedureManager where TEntity : class
     {
         void BeginTransaction();
 
@@ -17,9 +18,9 @@ namespace SchoolDBWebAPI.DAL.Interfaces
 
         void DeleteRange(Expression<Func<TEntity, bool>> filter);
 
-        void Update(TEntity entityToUpdate, string ChildEntities);
+        IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, int? skip = null, int? take = null, params Expression<Func<TEntity, bool>>[] includes);
 
-        IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = null, int? skip = null, int? take = null);
+        IEnumerable<TEntity> GetAll(Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null);
 
         TEntity GetByID(object id);
 
@@ -31,11 +32,11 @@ namespace SchoolDBWebAPI.DAL.Interfaces
 
         EntityEntry<TEntity> GetEntityEntry(TEntity entity);
 
-        Task<bool> IsExistsAsync(Expression<Func<TEntity, bool>> filter = null);
+        TEntity GetFirst(Expression<Func<TEntity, bool>> filter = null, params Expression<Func<TEntity, object>>[] includes);
 
-        TEntity GetFirst(Expression<Func<TEntity, bool>> filter = null, string includeProperties = null);
+        Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>> filter = null, params Expression<Func<TEntity, object>>[] includes);
 
-        Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>> filter = null, string includeProperties = null);
+        IQueryable<TEntity> GetQueryable(Expression<Func<TEntity, bool>> filter = null);
 
         IEnumerable<TEntity> GetWithRawSql(string query, params object[] parameters);
 
@@ -43,13 +44,13 @@ namespace SchoolDBWebAPI.DAL.Interfaces
 
         Task InsertAsync(TEntity entity);
 
-        IQueryable<TEntity> GetQueryable();
-
         void InsertRange(List<TEntity> entities);
 
         Task InsertRangeAsync(List<TEntity> entities);
 
         bool IsExists(Expression<Func<TEntity, bool>> filter = null);
+
+        Task<bool> IsExistsAsync(Expression<Func<TEntity, bool>> filter = null);
 
         void Rollback();
 
@@ -60,5 +61,7 @@ namespace SchoolDBWebAPI.DAL.Interfaces
         void SetEntityValues(TEntity entity, object Values);
 
         void Update(TEntity entityToUpdate);
+
+        void Update(TEntity entityToUpdate, params Expression<Func<TEntity, object>>[] includes);
     }
 }

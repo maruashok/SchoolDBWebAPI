@@ -18,11 +18,9 @@ namespace SchoolDBWebAPI.Services.Interfaces
 
         List<QuizDetail> GetAllQuiz();
 
-        QuizDetail GetQuizById(int QuizId);
-
         QuizDetail SearchQuiz(string QuizTitle);
 
-        QuizDetail Insert(QuizDetail quizDetail);
+        bool Insert(QuizDetail quizDetail);
 
         public QuizDetail QuizWithQues(int QuizId);
 
@@ -33,8 +31,6 @@ namespace SchoolDBWebAPI.Services.Interfaces
         QuizDetail AddQuiz(List<DBSQLParameter> SQLParams);
 
         List<QuizDetail> SearchQuizByTitle(string QuizTitle);
-
-        int DeleteRange(Expression<Func<QuizDetail, bool>> filter);
 
         List<QuizDetail> ListAllQuiz(Qry_SP_StudentMasterSelect model);
     }

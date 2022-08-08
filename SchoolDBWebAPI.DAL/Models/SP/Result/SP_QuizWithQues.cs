@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SchoolDBWebAPI.DAL.Models.SP.Result
+﻿namespace SchoolDBWebAPI.DAL.Models.SP.Result
 {
     public class SP_QuizWithQues
     {

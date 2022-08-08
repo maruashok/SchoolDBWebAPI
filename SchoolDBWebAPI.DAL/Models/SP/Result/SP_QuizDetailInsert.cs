@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SchoolDBWebAPI.DAL.Models.SP.Quiz
+﻿namespace SchoolDBWebAPI.DAL.Models.SP.Quiz
 {
     public class SP_QuizDetailInsert
     {

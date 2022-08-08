@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
 using SchoolDBWebAPI.DAL.DBModels;
-using SchoolDBWebAPI.DAL.Interfaces;
+using SchoolDBWebAPI.DAL.Helpers;
 using SchoolDBWebAPI.DAL.SPHelper;
 using System.Collections;
 using System.Linq.Expressions;
@@ -10,11 +10,11 @@ using System.Reflection;
 
 namespace SchoolDBWebAPI.DAL.Repository
 {
-    public abstract class BaseRepository<TEntity> : ProcedureManager, IRepository<TEntity> where TEntity : class
+    public abstract class BaseRepository<TEntity> : ProcedureManager, IBaseRepository<TEntity> where TEntity : class
     {
+        private readonly SchoolDBContext dBContext;
         private readonly DbSet<TEntity> dbSet;
         private IDbContextTransaction transaction;
-        private readonly SchoolDBContext dBContext;
 
         public BaseRepository(SchoolDBContext context) : base(context)
         {
@@ -22,41 +22,17 @@ namespace SchoolDBWebAPI.DAL.Repository
             this.dbSet = context.Set<TEntity>();
         }
 
-        public IQueryable<TEntity> GetQueryable()
+        public void BeginTransaction()
         {
-            return dbSet.AsNoTracking();
+            transaction = dBContext.Database.BeginTransaction();
         }
 
-        public virtual void DeleteById(object id)
+        public void Commit()
         {
-            TEntity entityToDelete = dbSet.Find(id);
-            Delete(entityToDelete);
-        }
-
-        public virtual TEntity GetByID(object id)
-        {
-            return dbSet.Find(id);
-        }
-
-        public virtual void Insert(TEntity entity)
-        {
-            dbSet.Add(entity);
-        }
-
-        public virtual void SetEntityValues(TEntity entity, object Values)
-        {
-            GetEntityEntry(entity).CurrentValues.SetValues(Values);
-        }
-
-        public virtual EntityEntry<TEntity> GetEntityEntry(TEntity entity)
-        {
-            return dBContext.Entry(entity);
-        }
-
-        public virtual async Task DeleteByIdAsync(object id)
-        {
-            TEntity entityToDelete = await dbSet.FindAsync(id);
-            Delete(entityToDelete);
+            if (transaction != null)
+            {
+                transaction.Commit();
+            }
         }
 
         public virtual void Delete(TEntity entityToDelete)
@@ -68,197 +44,30 @@ namespace SchoolDBWebAPI.DAL.Repository
             dbSet.Remove(entityToDelete);
         }
 
-        public virtual void Update(TEntity entityToUpdate)
+        public virtual void DeleteById(object id)
         {
-            dbSet.Attach(entityToUpdate);
-            dBContext.Entry(entityToUpdate).State = EntityState.Modified;
+            Delete(dbSet.Find(id));
         }
 
-        public virtual void Update(TEntity entityToUpdate, string ChildEntities)
+        public virtual async Task DeleteByIdAsync(object id)
         {
-            if (!string.IsNullOrEmpty(ChildEntities))
-            {
-                foreach (string updateProperty in ChildEntities.Split(',', StringSplitOptions.RemoveEmptyEntries))
-                {
-                    PropertyInfo property = typeof(TEntity).GetProperty(updateProperty);
-
-                    if (property != null && property.GetValue(entityToUpdate) != null)
-                    {
-                        object entityValue = property.GetValue(entityToUpdate);
-
-                        if (entityValue is IEnumerable)
-                        {
-                            foreach (var item in entityValue as IEnumerable)
-                            {
-                                if (item.GetType().IsClass)
-                                {
-                                    dBContext.Attach(item);
-                                    dBContext.Entry(item).State = EntityState.Modified;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (entityValue.GetType().IsClass)
-                            {
-                                dBContext.Attach(entityValue);
-                                dBContext.Entry(entityValue).State = EntityState.Modified;
-                            }
-                        }
-                    }
-                }
-            }
-
-            dbSet.Attach(entityToUpdate);
-            dBContext.Entry(entityToUpdate).State = EntityState.Modified;
-        }
-
-        public virtual async Task InsertAsync(TEntity entity)
-        {
-            await dbSet.AddAsync(entity);
-        }
-
-        public virtual void InsertRange(List<TEntity> entities)
-        {
-            dbSet.AddRange(entities);
-        }
-
-        public virtual async Task<TEntity> GetByIDAsync(object id)
-        {
-            return await dbSet.FindAsync(id);
-        }
-
-        public virtual async Task InsertRangeAsync(List<TEntity> entities)
-        {
-            await dbSet.AddRangeAsync(entities);
+            Delete(await dbSet.FindAsync(id));
         }
 
         public virtual void DeleteRange(Expression<Func<TEntity, bool>> filter)
         {
-            IQueryable<TEntity> query = GetQueryable();
+            IQueryable<TEntity> query = GetQueryable(filter);
 
-            if (filter != null)
+            if (query.Any())
             {
-                query = query.Where(filter);
-                if (query.Any())
-                {
-                    query.ToList().ForEach(item => Delete(item));
-                }
+                query.ToList().ForEach(item => Delete(item));
             }
         }
 
-        public virtual int GetCount(Expression<Func<TEntity, bool>> filter = null)
+        public virtual IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, int? skip = null, int? take = null, params Expression<Func<TEntity, bool>>[] includes)
         {
-            IQueryable<TEntity> query = GetQueryable();
-
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-
-            return query.Count();
-        }
-
-        public virtual bool IsExists(Expression<Func<TEntity, bool>> filter = null)
-        {
-            IQueryable<TEntity> query = GetQueryable();
-
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-
-            return query.Any();
-        }
-
-        public virtual IEnumerable<TEntity> GetWithRawSql(string query, params object[] parameters)
-        {
-            return dbSet.FromSqlRaw(query, parameters).ToList();
-        }
-
-        public virtual async Task<int> GetCountAsync(Expression<Func<TEntity, bool>> filter = null)
-        {
-            IQueryable<TEntity> query = GetQueryable();
-
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-
-            return await query.CountAsync();
-        }
-
-        public virtual async Task<bool> GetExistsAsync(Expression<Func<TEntity, bool>> filter = null)
-        {
-            IQueryable<TEntity> query = GetQueryable();
-
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-
-            return await query.AnyAsync();
-        }
-
-        public virtual TEntity GetFirst(Expression<Func<TEntity, bool>> filter = null, string includeProperties = null)
-        {
-            IQueryable<TEntity> query = GetQueryable();
-
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-
-            includeProperties ??= string.Empty;
-            foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-            {
-                if (typeof(TEntity).GetProperty(includeProperty) != null)
-                {
-                    query = query.Include(includeProperty);
-                }
-            }
-
-            return query.FirstOrDefault();
-        }
-
-        public virtual async Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>> filter = null, string includeProperties = null)
-        {
-            IQueryable<TEntity> query = GetQueryable();
-
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-
-            includeProperties ??= string.Empty;
-            foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-            {
-                if (typeof(TEntity).GetProperty(includeProperty) != null)
-                {
-                    query = query.Include(includeProperty);
-                }
-            }
-
-            return await query.FirstOrDefaultAsync();
-        }
-
-        public virtual IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = null, int? skip = null, int? take = null)
-        {
-            IQueryable<TEntity> query = GetQueryable();
-            includeProperties ??= string.Empty;
-
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-
-            foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-            {
-                if (typeof(TEntity).GetProperty(includeProperty) != null)
-                {
-                    query = query.Include(includeProperty);
-                }
-            }
+            IQueryable<TEntity> query = GetQueryable(filter);
+            query = includes.Aggregate(query, (current, include) => current.Include(include));
 
             if (orderBy != null)
             {
@@ -278,9 +87,115 @@ namespace SchoolDBWebAPI.DAL.Repository
             return query;
         }
 
-        public void BeginTransaction()
+        public virtual IEnumerable<TEntity> GetAll(Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null)
         {
-            transaction = dBContext.Database.BeginTransaction();
+            IQueryable<TEntity> query = GetQueryable();
+
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            return query;
+        }
+
+        public virtual TEntity GetByID(object id)
+        {
+            return dbSet.Find(id);
+        }
+
+        public virtual async Task<TEntity> GetByIDAsync(object id)
+        {
+            return await dbSet.FindAsync(id);
+        }
+
+        public virtual int GetCount(Expression<Func<TEntity, bool>> filter = null)
+        {
+            IQueryable<TEntity> query = GetQueryable(filter);
+            return query.Count();
+        }
+
+        public virtual async Task<int> GetCountAsync(Expression<Func<TEntity, bool>> filter = null)
+        {
+            IQueryable<TEntity> query = GetQueryable(filter);
+            return await query.CountAsync();
+        }
+
+        public virtual EntityEntry<TEntity> GetEntityEntry(TEntity entity)
+        {
+            return dBContext.Entry(entity);
+        }
+
+        public virtual TEntity GetFirst(Expression<Func<TEntity, bool>> filter = null, params Expression<Func<TEntity, object>>[] includes)
+        {
+            IQueryable<TEntity> query = GetQueryable(filter);
+            query = includes.Aggregate(query, (current, include) => current.Include(include));
+            return query.FirstOrDefault();
+        }
+
+        public virtual async Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>> filter = null, params Expression<Func<TEntity, object>>[] includes)
+        {
+            IQueryable<TEntity> query = GetQueryable(filter);
+            query = includes.Aggregate(query, (current, include) => current.Include(include));
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public IQueryable<TEntity> GetQueryable(Expression<Func<TEntity, bool>> filter = null)
+        {
+            IQueryable<TEntity> query = dbSet.AsNoTracking();
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            return query;
+        }
+
+        public virtual IEnumerable<TEntity> GetWithRawSql(string query, params object[] parameters)
+        {
+            return dbSet.FromSqlRaw(query, parameters).ToList();
+        }
+
+        public virtual void Insert(TEntity entity)
+        {
+            dbSet.Add(entity);
+        }
+
+        public virtual async Task InsertAsync(TEntity entity)
+        {
+            await dbSet.AddAsync(entity);
+        }
+
+        public virtual void InsertRange(List<TEntity> entities)
+        {
+            dbSet.AddRange(entities);
+        }
+
+        public virtual async Task InsertRangeAsync(List<TEntity> entities)
+        {
+            await dbSet.AddRangeAsync(entities);
+        }
+
+        public virtual bool IsExists(Expression<Func<TEntity, bool>> filter = null)
+        {
+            IQueryable<TEntity> query = GetQueryable(filter);
+            return query.Any();
+        }
+
+        public virtual async Task<bool> IsExistsAsync(Expression<Func<TEntity, bool>> filter = null)
+        {
+            IQueryable<TEntity> query = GetQueryable(filter);
+            return await query.AnyAsync();
+        }
+
+        public void Rollback()
+        {
+            if (transaction != null)
+            {
+                transaction.Rollback();
+                transaction.Dispose();
+            }
         }
 
         public int SaveChanges()
@@ -293,21 +208,55 @@ namespace SchoolDBWebAPI.DAL.Repository
             return dBContext.SaveChangesAsync();
         }
 
-        public void Commit()
+        public virtual void SetEntityValues(TEntity entity, object Values)
         {
-            if (transaction != null)
-            {
-                transaction.Commit();
-            }
+            GetEntityEntry(entity).CurrentValues.SetValues(Values);
         }
 
-        public void Rollback()
+        public virtual void Update(TEntity entityToUpdate)
         {
-            if (transaction != null)
+            dbSet.Attach(entityToUpdate);
+            dBContext.Entry(entityToUpdate).State = EntityState.Modified;
+        }
+
+        public virtual void Update(TEntity entityToUpdate, params Expression<Func<TEntity, object>>[] properties)
+        {
+            if (properties != null)
             {
-                transaction.Rollback();
-                transaction.Dispose();
+                foreach (var currentProperty in properties)
+                {
+                    string propertyName = currentProperty.GetPropertyName();
+
+                    if (!string.IsNullOrEmpty(propertyName) && entityToUpdate.GetPropertyValue(propertyName, out object entityValue))
+                    {
+                        if (entityValue != null)
+                        {
+                            if (entityValue is IEnumerable enumerable)
+                            {
+                                foreach (var item in enumerable)
+                                {
+                                    if (item.GetType().IsClass)
+                                    {
+                                        dBContext.Attach(item);
+                                        dBContext.Entry(item).State = EntityState.Modified;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (entityValue.GetType().IsClass)
+                                {
+                                    dBContext.Attach(entityValue);
+                                    dBContext.Entry(entityValue).State = EntityState.Modified;
+                                }
+                            }
+                        }
+                    }
+                }
             }
+
+            dbSet.Attach(entityToUpdate);
+            dBContext.Entry(entityToUpdate).State = EntityState.Modified;
         }
     }
 }

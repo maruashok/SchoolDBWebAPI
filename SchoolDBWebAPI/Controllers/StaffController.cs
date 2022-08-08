@@ -14,64 +14,42 @@ namespace SchoolDBWebAPI.Controllers
     public class StaffController : ControllerBase
     {
         private readonly IStaffService service;
-        private readonly ILogger<StaffController> logger;
 
-        public StaffController(IStaffService staffService, ILogger<StaffController> _logger)
+        public StaffController(IStaffService staffService)
         {
-            logger = _logger;
             service = staffService;
         }
 
+        [HttpGet]
         [Authorize]
-        [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
             RequestResponse response = new();
 
-            try
-            {
-                staff staffDetail = service.GetStaff(id);
+            staff staffDetail = service.GetStaff(id);
 
-                if (staffDetail != null)
-                {
-                    response.Success = true;
-                    response.Data = staffDetail;
-                    logger.LogInformation("Details loaded");
-                }
-            }
-            catch (Exception Ex)
+            if (staffDetail != null)
             {
-                response.Success = false;
-                response.Message = Ex.Message;
-                logger.LogError(Ex, Ex.Message);
+                response.Success = true;
+                response.Data = staffDetail;
             }
 
             return Ok(response);
         }
 
         [HttpPost]
-        [Route("update")]
         public async Task<IActionResult> UpdateAsync(staff model)
         {
             RequestResponse response = new();
 
-            try
+            if (await service.UpdateAsync(model))
             {
-                if (await service.UpdateAsync(model))
-                {
-                    response.Success = true;
-                    response.Message = "Staff Updated Successfully";
-                }
-                else
-                {
-                    response.Message = "Failed to Updated Staff Details";
-                }
+                response.Success = true;
+                response.Message = "Staff Updated Successfully";
             }
-            catch (Exception Ex)
+            else
             {
-                response.Success = false;
-                response.Message = Ex.Message;
-                logger.LogError(Ex, Ex.Message);
+                response.Message = "Failed to Updated Staff Details";
             }
 
             return Ok(response);

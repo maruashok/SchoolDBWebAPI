@@ -15,42 +15,21 @@ namespace SchoolDBWebAPI.Services.Services
 {
     public class QuizDetailService : IQuizDetailService
     {
-        private readonly ILogger logger;
         private readonly IQuizRepository Repository;
 
         public QuizDetailService(IQuizRepository _repository)
         {
             Repository = _repository;
-            logger = Log.ForContext<QuizDetailService>();
         }
 
         public QuizDetail AddQuiz(List<DBSQLParameter> SQLParams)
         {
-            return Repository.ExecStoreProcedure<QuizDetail>("SP_QuizDetailInsert", SQLParams).FirstOrDefault();
+            return Repository.AddQuiz(SQLParams);
         }
 
         public async Task<bool> UpdateAsync(QuizDetail model)
         {
-            bool isUpdated = default;
-
-            try
-            {
-                QuizDetail quizDetail = await Repository.GetFirstAsync(quiz => quiz.Id == model.Id, includeProperties: "QuizQuestions");
-
-                if (quizDetail != null)
-                {
-                    Repository.SetEntityValues(quizDetail, model);
-                    quizDetail.QuizQuestions = model.QuizQuestions;
-                    Repository.Update(quizDetail, "QuizQuestions");
-                    isUpdated = await Repository.SaveChangesAsync() > 0;
-                }
-            }
-            catch (Exception Ex)
-            {
-                logger.Error(Ex, Ex.Message);
-            }
-
-            return isUpdated;
+            return await Repository.UpdateAsync(model);
         }
 
         public bool IsQuizExists(int QuizId)
@@ -60,12 +39,12 @@ namespace SchoolDBWebAPI.Services.Services
 
         public List<QuizDetail> ListAllQuiz(Qry_SP_StudentMasterSelect model)
         {
-            return Repository.ExecStoreProcedure<QuizDetail>("SP_StudentMasterSelect", model);
+            return Repository.GetAll(model);
         }
 
         public List<QuizDetail> SearchQuizByTitle(string QuizTitle)
         {
-            return Repository.GetWithRawSql($@"Select * from QuizDetail where Title like '%' + @Qry +'%'", QuizTitle).ToList();
+            return Repository.SearchQuizByTitle(QuizTitle);
         }
 
         public QuizDetail SearchQuiz(string QuizTitle)
@@ -75,87 +54,32 @@ namespace SchoolDBWebAPI.Services.Services
 
         public async Task<QuizDetail> QuizWithQuesAsync(int QuizId)
         {
-            QuizDetail quizDetail = default;
-
-            try
-            {
-                quizDetail = await Repository.GetFirstAsync(quiz => quiz.Id == QuizId, includeProperties: "QuizQuestions");
-            }
-            catch (Exception Ex)
-            {
-                logger.Error(Ex, Ex.Message);
-            }
-
-            return quizDetail;
+            return await Repository.QuizWithQuesAsync(QuizId); ;
         }
 
         public QuizDetail QuizWithQues(int QuizId)
         {
-            QuizDetail quizDetail = default;
-
-            try
-            {
-                var paramList = new List<DBSQLParameter>();
-                paramList.Add(new DBSQLParameter("@QuizId", QuizId));
-                var result = Repository.ExecStoreProcedureMulResults<QuizDetail, QuizQuestion>("SP_QuizWithQues", paramList);
-                quizDetail = (result.Item1.Map(result.Item2, quiz => quiz.Id, quizQues => quizQues.QuizId, (quiz, ques) => { quiz.QuizQuestions = ques.ToList(); }) as List<QuizDetail>).FirstOrDefault();
-            }
-            catch (Exception Ex)
-            {
-                logger.Error(Ex, Ex.Message);
-            }
-
-            return quizDetail;
+            return Repository.QuizWithQues(QuizId);
         }
 
         public QuizDetail GetByID(int QuizId)
         {
-            QuizDetail quizDetail = default;
-            try
-            {
-                quizDetail = Repository.GetByID(QuizId);
-            }
-            catch (Exception Ex)
-            {
-                logger.Error(Ex, Ex.Message);
-            }
-            return quizDetail;
+            return Repository.GetByID(QuizId);
         }
 
-        public QuizDetail Insert(QuizDetail quizDetail)
+        public bool Insert(QuizDetail quizDetail)
         {
-            Repository.Insert(quizDetail);
-            Repository.SaveChanges();
-            return quizDetail;
-        }
-
-        public QuizDetail GetQuizById(int QuizId)
-        {
-            QuizDetail quiz = Repository.GetFirst(quiz => quiz.Title.Contains("March") && quiz.Id != QuizId);
-
-            if (quiz != null)
-            {
-                quiz = Repository.GetByID(quiz.Id);
-            }
-
-            return quiz;
+            return Repository.Insert(quizDetail);
         }
 
         public bool DeleteByID(int QuizId)
         {
-            Repository.DeleteById(QuizId);
-            return Repository.SaveChanges() > 0;
-        }
-
-        public int DeleteRange(Expression<Func<QuizDetail, bool>> filter)
-        {
-            Repository.DeleteRange(filter);
-            return Repository.SaveChanges();
+            return Repository.DeleteByID(QuizId);
         }
 
         public List<QuizDetail> GetAllQuiz()
         {
-            return Repository.Get().ToList();
+            return Repository.GetAll().ToList();
         }
     }
 }

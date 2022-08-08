@@ -41,13 +41,13 @@ namespace SchoolDBWebAPI.Services.Test
         public void Test_GetFirst()
         {
             repoMock.Setup(mock => mock.GetByID(1)).Returns(quizDetail);
-            repoMock.Setup(quiz => quiz.GetFirst(quiz => quiz.Title.Contains(quizDetail.Title) && quiz.Id != quizDetail.Id, It.IsAny<string>())).Returns(quizDetail);
+            repoMock.Setup(quiz => quiz.GetFirst(quiz => quiz.Title.Contains(quizDetail.Title) && quiz.Id != quizDetail.Id, null)).Returns(quizDetail);
 
             IQuizDetailService service = new QuizDetailService(repoMock.Object);
 
             if (service != null)
             {
-                QuizDetail quiz = service.GetQuizById(1);
+                QuizDetail quiz = service.GetByID(1);
                 Assert.NotNull(quiz);
                 Assert.Equal(quizDetail.Id, quiz.Id);
             }
@@ -57,9 +57,9 @@ namespace SchoolDBWebAPI.Services.Test
         public void Test_SearchQuiz()
         {
             var queryMock = quizDetails.BuildMock();
-            repoMock.Setup(mock => mock.GetQueryable()).Returns(queryMock);
+            repoMock.Setup(mock => mock.GetQueryable(null)).Returns(queryMock);
             IQuizDetailService service = new QuizDetailService(repoMock.Object);
-            repoMock.Setup(quiz => quiz.GetFirst(It.IsAny<Expression<Func<QuizDetail, bool>>>(), It.IsAny<string>())).Returns(quizDetail);
+            repoMock.Setup(quiz => quiz.GetFirst(It.IsAny<Expression<Func<QuizDetail, bool>>>(), null)).Returns(quizDetail);
 
             if (service != null)
             {
@@ -67,7 +67,7 @@ namespace SchoolDBWebAPI.Services.Test
 
                 Assert.NotNull(quiz);
                 Assert.Equal(quizDetail.Title, quiz.Title);
-                repoMock.Verify(quiz => quiz.GetFirst(It.IsAny<Expression<Func<QuizDetail, bool>>>(), It.IsAny<string>()));
+                repoMock.Verify(quiz => quiz.GetFirst(It.IsAny<Expression<Func<QuizDetail, bool>>>(), null));
             }
         }
 
@@ -141,14 +141,13 @@ namespace SchoolDBWebAPI.Services.Test
         public void Test_DeleteRange()
         {
             var queryMock = quizDetails.BuildMock();
-            repoMock.Setup(mock => mock.GetQueryable()).Returns(queryMock);
+            repoMock.Setup(mock => mock.GetQueryable(null)).Returns(queryMock);
             IQuizDetailService service = new QuizDetailService(repoMock.Object);
             repoMock.Setup(quiz => quiz.DeleteRange(It.IsAny<Expression<Func<QuizDetail, bool>>>()));
 
             if (service != null)
             {
-                service.DeleteRange(quiz => quiz.Id > 0);
-
+                service.DeleteByID(1);
                 repoMock.Verify(r => r.SaveChanges());
                 repoMock.Verify(quiz => quiz.DeleteRange(It.IsAny<Expression<Func<QuizDetail, bool>>>()));
             }

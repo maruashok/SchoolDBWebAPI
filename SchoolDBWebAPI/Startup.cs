@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using SchoolDBWebAPI.DAL.DBModels;
+using SchoolDBWebAPI.DAL.Helpers;
 using SchoolDBWebAPI.DAL.UserIdentity;
 using SchoolDBWebAPI.Dependency;
 using SchoolDBWebAPI.Extensions;
@@ -66,8 +67,12 @@ namespace SchoolDBWebAPI
                 });
             });
 
-            services.AddDbContext<SchoolDBContext>(
-                    options => options.UseSqlServer(Configuration.GetConnectionString("Default")));
+            services.AddDbContext<SchoolDBContext>(options =>
+            {
+                options.EnableSensitiveDataLogging(true);
+                options.UseLoggerFactory(AppLoggerFactory.DBLoggerFactory);
+                options.UseSqlServer(Configuration.GetConnectionString("Default"));
+            });
 
             services.AddDbContext<UsersDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("Default")));
 

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SchoolDBWebAPI.DAL.Models.SP
+﻿namespace SchoolDBWebAPI.DAL.Models.SP
 {
     public class SP_StudentMasterSelect
     {
