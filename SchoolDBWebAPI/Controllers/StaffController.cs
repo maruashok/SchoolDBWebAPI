@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SchoolDBWebAPI.DAL.DBModels;
+using SchoolDBWebAPI.Services.Interfaces;
 using SchoolDBWebAPI.Services.Models;
-using SchoolDBWebAPI.Services.Services;
 using System;
 using System.Threading.Tasks;
 

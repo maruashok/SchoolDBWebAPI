@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace SchoolDBWebAPI.DAL.SPHelper
 {
-    public class ProcedureManager : IProcedureManager
+    public class ProcedureManager
     {
         private bool disposed = false;
         private readonly SchoolDBContext dbContext;

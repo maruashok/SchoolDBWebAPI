@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using SchoolDBWebAPI.DAL.Interfaces;
 using SchoolDBWebAPI.DAL.Repository;
 using SchoolDBWebAPI.Services.Interfaces;
 using SchoolDBWebAPI.Services.Services;
@@ -11,7 +12,6 @@ namespace SchoolDBWebAPI.Dependency
         {
             services.AddScoped<IQuizRepository, QuizRepository>();
             services.AddScoped<IStaffRepository, StaffRepository>();
-            services.AddScoped<IQuizQuesRepository, QuizQuesRepository>();
         }
 
         public static void AddRepoServices(this IServiceCollection services)
@@ -19,7 +19,6 @@ namespace SchoolDBWebAPI.Dependency
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IStaffService, StaffService>();
             services.AddScoped<IQuizDetailService, QuizDetailService>();
-            services.AddScoped<IQuizQuesRepository, QuizQuesRepository>();
         }
     }
 }

@@ -1,12 +1,8 @@
 ﻿using SchoolDBWebAPI.DAL.DBModels;
+using SchoolDBWebAPI.DAL.Interfaces;
 
 namespace SchoolDBWebAPI.DAL.Repository
 {
-    public interface IStaffRepository : IBaseRepository<staff>
-    {
-        public staff GetStaffById(int id);
-    }
-
     public class StaffRepository : BaseRepository<staff>, IStaffRepository
     {
         public StaffRepository(SchoolDBContext dBContext) : base(dBContext)

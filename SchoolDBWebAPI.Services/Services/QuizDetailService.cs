@@ -1,7 +1,7 @@
 ﻿using SchoolDBWebAPI.DAL.DBModels;
 using SchoolDBWebAPI.DAL.Extensions;
+using SchoolDBWebAPI.DAL.Interfaces;
 using SchoolDBWebAPI.DAL.Models.SP.Query;
-using SchoolDBWebAPI.DAL.Repository;
 using SchoolDBWebAPI.DAL.SPHelper;
 using SchoolDBWebAPI.Services.Interfaces;
 using Serilog;

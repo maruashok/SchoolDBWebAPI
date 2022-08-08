@@ -1,7 +1,7 @@
 ﻿using MockQueryable.Moq;
 using Moq;
 using SchoolDBWebAPI.DAL.DBModels;
-using SchoolDBWebAPI.DAL.Repository;
+using SchoolDBWebAPI.DAL.Interfaces;
 using SchoolDBWebAPI.Services.Interfaces;
 using SchoolDBWebAPI.Services.Services;
 using System;
@@ -97,30 +97,6 @@ namespace SchoolDBWebAPI.Services.Test
                 service.Insert(quizDetail);
                 repoMock.Verify(r => r.Insert(It.IsAny<QuizDetail>()));
                 repoMock.Verify(r => r.SaveChanges());
-            }
-        }
-
-        [Fact]
-        public void Test_AddQues()
-        {
-            Mock<IQuizQuesRepository> repoQuesMock = new();
-            Mock<IQuizRepository> repoQuizMock = new();
-            //Mock<IQuizDetailService> quizServiceMock = new();
-            repoQuizMock.Setup(mock => mock.GetByID(quizDetail.Id)).Returns(quizDetail);
-
-            IQuizQuesService service = new QuizQuesService(repoQuesMock.Object, repoQuizMock.Object);
-
-            if (service != null)
-            {
-                QuizQuestion question = new QuizQuestion()
-                {
-                    QuizId = 11,
-                    Description = "Test"
-                };
-
-                service.AddQues(question);
-                repoQuesMock.Verify(r => r.Insert(It.IsAny<QuizQuestion>()));
-                repoQuesMock.Verify(r => r.SaveChanges());
             }
         }
 

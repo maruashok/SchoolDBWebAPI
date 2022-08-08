@@ -1,16 +1,10 @@
 ﻿using SchoolDBWebAPI.DAL.DBModels;
-using SchoolDBWebAPI.DAL.Repository;
+using SchoolDBWebAPI.DAL.Interfaces;
+using SchoolDBWebAPI.Services.Interfaces;
 using System.Threading.Tasks;
 
 namespace SchoolDBWebAPI.Services.Services
 {
-    public interface IStaffService
-    {
-        staff GetStaff(int staffId);
-
-        Task<bool> UpdateAsync(staff model);
-    }
-
     public class StaffService : IStaffService
     {
         private readonly IStaffRepository staffRepository;

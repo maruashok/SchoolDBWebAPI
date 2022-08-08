@@ -1,10 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
-using SchoolDBWebAPI.DAL.Interfaces;
 using System.Linq.Expressions;
 
-namespace SchoolDBWebAPI.DAL.Repository
+namespace SchoolDBWebAPI.DAL.Interfaces
 {
-    public interface IBaseRepository<TEntity> : IProcedureManager where TEntity : class
+    public interface IBaseRepository<TEntity> where TEntity : class
     {
         void BeginTransaction();
 
