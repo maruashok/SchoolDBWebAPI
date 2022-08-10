@@ -37,21 +37,35 @@ namespace SchoolDBWebAPI.DAL.Repository
 
         public virtual void Delete(TEntity entityToDelete)
         {
-            if (dBContext.Entry(entityToDelete).State == EntityState.Detached)
+            if (entityToDelete != null)
             {
-                dbSet.Attach(entityToDelete);
+                if (dBContext.Entry(entityToDelete).State == EntityState.Detached)
+                {
+                    dbSet.Attach(entityToDelete);
+                }
+
+                dbSet.Remove(entityToDelete);
             }
-            dbSet.Remove(entityToDelete);
         }
 
         public virtual void DeleteById(object id)
         {
-            Delete(dbSet.Find(id));
+            TEntity? entity = dbSet.Find(id);
+
+            if (entity != null)
+            {
+                Delete(entity);
+            }
         }
 
         public virtual async Task DeleteByIdAsync(object id)
         {
-            Delete(await dbSet.FindAsync(id));
+            TEntity? entity = await dbSet.FindAsync(id);
+
+            if (entity != null)
+            {
+                Delete(entity);
+            }
         }
 
         public virtual void DeleteRange(Expression<Func<TEntity, bool>> filter)
@@ -64,7 +78,7 @@ namespace SchoolDBWebAPI.DAL.Repository
             }
         }
 
-        public virtual IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, int? skip = null, int? take = null, params Expression<Func<TEntity, bool>>[] includes)
+        public virtual IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, int? skip = null, int? take = null, params Expression<Func<TEntity, bool>>[] includes)
         {
             IQueryable<TEntity> query = GetQueryable(filter);
             query = includes.Aggregate(query, (current, include) => current.Include(include));
@@ -126,11 +140,11 @@ namespace SchoolDBWebAPI.DAL.Repository
             return dBContext.Entry(entity);
         }
 
-        public virtual TEntity GetFirst(Expression<Func<TEntity, bool>> filter = null, params Expression<Func<TEntity, object>>[] includes)
+        public virtual TEntity? GetFirst(Expression<Func<TEntity, bool>> filter = null, params Expression<Func<TEntity, object>>[] includes)
         {
             IQueryable<TEntity> query = GetQueryable(filter);
             query = includes.Aggregate(query, (current, include) => current.Include(include));
-            return query.FirstOrDefault();
+            return query?.FirstOrDefault();
         }
 
         public virtual async Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>> filter = null, params Expression<Func<TEntity, object>>[] includes)
@@ -159,31 +173,43 @@ namespace SchoolDBWebAPI.DAL.Repository
 
         public virtual void Insert(TEntity entity)
         {
-            dbSet.Add(entity);
+            if (entity != null)
+            {
+                dbSet.Add(entity);
+            }
         }
 
         public virtual async Task InsertAsync(TEntity entity)
         {
-            await dbSet.AddAsync(entity);
+            if (entity != null)
+            {
+                await dbSet.AddAsync(entity);
+            }
         }
 
         public virtual void InsertRange(List<TEntity> entities)
         {
-            dbSet.AddRange(entities);
+            if (entities != null)
+            {
+                dbSet.AddRange(entities);
+            }
         }
 
         public virtual async Task InsertRangeAsync(List<TEntity> entities)
         {
-            await dbSet.AddRangeAsync(entities);
+            if (entities != null)
+            {
+                await dbSet.AddRangeAsync(entities);
+            }
         }
 
-        public virtual bool IsExists(Expression<Func<TEntity, bool>> filter = null)
+        public virtual bool IsExists(Expression<Func<TEntity, bool>> filter)
         {
             IQueryable<TEntity> query = GetQueryable(filter);
             return query.Any();
         }
 
-        public virtual async Task<bool> IsExistsAsync(Expression<Func<TEntity, bool>> filter = null)
+        public virtual async Task<bool> IsExistsAsync(Expression<Func<TEntity, bool>> filter)
         {
             IQueryable<TEntity> query = GetQueryable(filter);
             return await query.AnyAsync();
@@ -215,17 +241,20 @@ namespace SchoolDBWebAPI.DAL.Repository
 
         public virtual void Update(TEntity entityToUpdate)
         {
-            dbSet.Attach(entityToUpdate);
-            dBContext.Entry(entityToUpdate).State = EntityState.Modified;
+            if (entityToUpdate != null)
+            {
+                dbSet.Attach(entityToUpdate);
+                dBContext.Entry(entityToUpdate).State = EntityState.Modified;
+            }
         }
 
-        public virtual void Update(TEntity entityToUpdate, params Expression<Func<TEntity, object>>[] properties)
+        public virtual void Update(TEntity entityToUpdate, params Expression<Func<TEntity, object>>[] childEntities)
         {
-            if (properties != null)
+            if (childEntities != null)
             {
-                foreach (var currentProperty in properties)
+                foreach (var entityExpr in childEntities)
                 {
-                    string propertyName = currentProperty.GetPropertyName();
+                    string propertyName = entityExpr.GetPropertyName();
 
                     if (!string.IsNullOrEmpty(propertyName) && entityToUpdate.GetPropertyValue(propertyName, out object entityValue))
                     {
