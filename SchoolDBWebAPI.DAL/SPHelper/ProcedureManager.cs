@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Dapper;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SchoolDBWebAPI.DAL.DBModels;
 using SchoolDBWebAPI.DAL.Extensions;
@@ -9,224 +10,39 @@ using System.Reflection;
 
 namespace SchoolDBWebAPI.DAL.SPHelper
 {
-    public class ProcedureManager
+    public class ProcedureManager : IDisposable, IProcedureManager
     {
         private bool disposed = false;
-        private readonly SchoolDBContext dbContext;
+        private readonly DbContext dbContext;
+        private readonly IDbConnection connection;
         private readonly ILogger logger = Log.ForContext(typeof(ProcedureManager));
 
-        public ProcedureManager(SchoolDBContext _dBContext)
+        public ProcedureManager(DbContext _dBContext)
         {
             dbContext = _dBContext;
+            connection = new SqlConnection(dbContext.Database.GetConnectionString());
         }
 
-        private bool OpenConnection(SqlConnection connection)
+        public TResultSet MapToSpMultipleResultSet<TResultSet>(string storeProcedure, object parameters, int? timeOut = 30) where TResultSet : MultipleResultSet, new()
         {
-            bool Result = false;
-            try
-            {
-                if (connection.State != ConnectionState.Open)
-                {
-                    connection.Open();
-                }
-
-                Result = connection.State == ConnectionState.Open;
-            }
-            catch (Exception Ex)
-            {
-                logger.Error(Ex, Ex.Message);
-            }
-
-            return Result;
-        }
-
-        private void CloseConnection(SqlConnection connection)
-        {
-            try
-            {
-                if (connection.State != ConnectionState.Closed)
-                {
-                    connection.Close();
-                }
-            }
-            catch (Exception Ex)
-            {
-                logger.Error(Ex, Ex.Message);
-            }
-        }
-
-        public List<DBSQLParameter> GenerateParams(object objModel, bool AddNull = false)
-        {
-            List<DBSQLParameter> paramList = new List<DBSQLParameter>();
+            var result = new TResultSet();
 
             try
             {
-                foreach (PropertyInfo item in objModel.GetType().GetProperties())
+                using (var multi = connection.QueryMultiple(storeProcedure, parameters, commandTimeout: timeOut, commandType: CommandType.StoredProcedure))
                 {
-                    if (item.GetValue(objModel) == null)
+                    if (multi != null)
                     {
-                        if (AddNull)
+                        foreach (var tprop in typeof(TResultSet).GetProperties())
                         {
-                            paramList.Add(new DBSQLParameter($"@{item.Name}", DBNull.Value));
-                        }
-                    }
-                    else
-                    {
-                        paramList.Add(new DBSQLParameter($"@{item.Name}", item.GetValue(objModel)));
-                    }
-                }
-            }
-            catch (Exception Ex)
-            {
-                logger.Error(Ex, Ex.Message);
-            }
+                            var list = result.CreateListType(tprop);
+                            var innerType = result.GetInnerType(tprop);
 
-            return paramList;
-        }
+                            multi.Read(innerType).ToList().ForEach(f => list.Add(f));
 
-        public bool ExecStoreProcedure(string StoreProcedure, object StoreProcedureModel)
-        {
-            bool Result = true;
-
-            try
-            {
-                List<DBSQLParameter> SQLParameters = GenerateParams(StoreProcedureModel);
-                using (SqlConnection connection = new SqlConnection(dbContext.Database.GetConnectionString()))
-                {
-                    using (SqlCommand sqlCommand = new SqlCommand(StoreProcedure, connection))
-                    {
-                        sqlCommand.AddParams(GenerateParams(StoreProcedureModel));
-
-                        if (OpenConnection(connection))
-                        {
-                            sqlCommand.ExecuteNonQuery();
-                            CloseConnection(connection);
-                        }
-                    }
-                }
-            }
-            catch (Exception Ex)
-            {
-                logger.Error(Ex, Ex.Message);
-            }
-
-            return Result;
-        }
-
-        public List<T> ExecStoreProcedure<T>(string StoreProcedure, object StoreProcedureModel)
-        {
-            List<T> objResult = default;
-            DataTable _table = new DataTable();
-
-            try
-            {
-                List<DBSQLParameter> SQLParameters = GenerateParams(StoreProcedureModel);
-                using (SqlConnection connection = new SqlConnection(dbContext.Database.GetConnectionString()))
-                {
-                    using (SqlCommand sqlCommand = new SqlCommand(StoreProcedure, connection))
-                    {
-                        sqlCommand.AddParams(GenerateParams(StoreProcedureModel));
-
-                        using (var dataAdapter = new SqlDataAdapter(sqlCommand))
-                        {
-                            dataAdapter.Fill(_table);
-                        }
-                    }
-                }
-
-                if (_table != null)
-                {
-                    objResult = _table.ToList<T>();
-                }
-            }
-            catch (Exception Ex)
-            {
-                logger.Error(Ex, Ex.Message);
-            }
-
-            return objResult;
-        }
-
-        public bool ExecStoreProcedure(string StoreProcedure, List<DBSQLParameter> SQLParameters)
-        {
-            bool Result = true;
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(dbContext.Database.GetConnectionString()))
-                {
-                    using (SqlCommand sqlCommand = new SqlCommand(StoreProcedure, connection))
-                    {
-                        sqlCommand.AddParams(SQLParameters);
-
-                        if (OpenConnection(connection))
-                        {
-                            sqlCommand.ExecuteNonQuery();
-                            CloseConnection(connection);
-                        }
-                    }
-                }
-            }
-            catch (Exception Ex)
-            {
-                logger.Error(Ex, Ex.Message);
-            }
-
-            return Result;
-        }
-
-        public List<T> ExecStoreProcedure<T>(string StoreProcedure, List<DBSQLParameter> SQLParameters)
-        {
-            List<T> objResult = default;
-            DataTable _table = new DataTable();
-
-            try
-            {
-                Log.Information(StoreProcedure);
-                using (SqlConnection connection = new SqlConnection(dbContext.Database.GetConnectionString()))
-                {
-                    using (SqlCommand sqlCommand = new SqlCommand(StoreProcedure, connection))
-                    {
-                        sqlCommand.AddParams(SQLParameters);
-
-                        using (var dataAdapter = new SqlDataAdapter(sqlCommand))
-                        {
-                            dataAdapter.Fill(_table);
-                        }
-                    }
-                }
-
-                if (_table != null)
-                {
-                    objResult = _table.ToList<T>();
-                }
-            }
-            catch (Exception Ex)
-            {
-                logger.Error(Ex, Ex.Message);
-            }
-
-            return objResult;
-        }
-
-        public List<DBSQLParameter> ExecStoreProcedureOut(string StoreProcedure, List<DBSQLParameter> SQLParameters)
-        {
-            List<DBSQLParameter> OutSQLParameters = default;
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(dbContext.Database.GetConnectionString()))
-                {
-                    using (SqlCommand sqlCommand = new SqlCommand(StoreProcedure, connection))
-                    {
-                        sqlCommand.AddParams(SQLParameters);
-                        sqlCommand.ExecuteNonQuery();
-
-                        if (SQLParameters != null)
-                        {
-                            foreach (DBSQLParameter curParam in SQLParameters.Where(param => param.IsOutParam).ToList())
+                            if (list != null)
                             {
-                                OutSQLParameters.Add(new DBSQLParameter(curParam.Name, sqlCommand.Parameters[curParam.Name].Value.ChangeType<object>()));
+                                tprop.SetValue(result, list, null);
                             }
                         }
                     }
@@ -237,41 +53,71 @@ namespace SchoolDBWebAPI.DAL.SPHelper
                 logger.Error(Ex, Ex.Message);
             }
 
-            return OutSQLParameters;
+            return result;
         }
 
-        public Tuple<List<TFirst>, List<TSecond>> ExecStoreProcedureMulResults<TFirst, TSecond>(string StoreProcedure, List<DBSQLParameter> SQLParameters)
+        public int ExecStoreProcedure(string storeProcedure, object parameters, int? timeOut = 30)
         {
-            List<TFirst> firstResult = new();
-            List<TSecond> secondResult = new();
+            int Result = -1;
 
             try
             {
-                using (SqlConnection connection = new SqlConnection(dbContext.Database.GetConnectionString()))
-                {
-                    if (OpenConnection(connection))
-                    {
-                        using (SqlCommand sqlCommand = new SqlCommand(StoreProcedure, connection))
-                        {
-                            sqlCommand.AddParams(SQLParameters);
-
-                            using (var reader = sqlCommand.ExecuteReader())
-                            {
-                                firstResult = reader.MapToList<TFirst>();
-                                reader.NextResult();
-                                secondResult = reader.MapToList<TSecond>();
-                                reader.Close();
-                            }
-                        }
-                    }
-                }
+                Result = connection.Execute(sql: storeProcedure, param: parameters, commandTimeout: timeOut, commandType: CommandType.StoredProcedure);
             }
             catch (Exception Ex)
             {
                 logger.Error(Ex, Ex.Message);
             }
 
-            return new Tuple<List<TFirst>, List<TSecond>>(firstResult, secondResult);
+            return Result;
+        }
+
+        public Task<int>? ExecStoreProcedureAsync<TResult>(string storeProcedure, object parameters, int? timeOut = 30)
+        {
+            Task<int>? objResult = default;
+
+            try
+            {
+                objResult = connection.ExecuteAsync(sql: storeProcedure, param: parameters, commandTimeout: timeOut, commandType: CommandType.StoredProcedure);
+            }
+            catch (Exception Ex)
+            {
+                logger.Error(Ex, Ex.Message);
+            }
+
+            return objResult;
+        }
+
+        public IEnumerable<TResult>? ExecStoreProcedureList<TResult>(string storeProcedure, object parameters, int? timeOut = 30)
+        {
+            List<TResult>? objResult = default;
+
+            try
+            {
+                return connection.Query<TResult>(sql: storeProcedure, param: parameters, commandTimeout: timeOut, commandType: CommandType.StoredProcedure);
+            }
+            catch (Exception Ex)
+            {
+                logger.Error(Ex, Ex.Message);
+            }
+
+            return objResult;
+        }
+
+        public Task<IEnumerable<TResult>>? ExecStoreProcedureListAsync<TResult>(string storeProcedure, object parameters, int? timeOut = 30)
+        {
+            Task<IEnumerable<TResult>>? objResult = default;
+
+            try
+            {
+                return connection.QueryAsync<TResult>(sql: storeProcedure, param: parameters, commandTimeout: timeOut, commandType: CommandType.StoredProcedure);
+            }
+            catch (Exception Ex)
+            {
+                logger.Error(Ex, Ex.Message);
+            }
+
+            return objResult;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -289,6 +135,7 @@ namespace SchoolDBWebAPI.DAL.SPHelper
         public void Dispose()
         {
             Dispose(true);
+            connection.Dispose();
             GC.SuppressFinalize(this);
         }
     }
